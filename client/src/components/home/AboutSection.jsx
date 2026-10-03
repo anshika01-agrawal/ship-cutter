@@ -5,11 +5,11 @@ import AnimatedSection from '../common/AnimatedSection';
 export default function AboutSection() {
   const team = [
     {
-      name: 'Dr. Aris Thorne',
-      role: 'Chief Robotics Architect',
-      credentials: 'Ph.D. Robotics, MIT Marine Automation Lab',
-      photo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80',
-      bio: 'Pioneered 6-axis magnetic crawler kinematics and high-temp plasma torch dampening for vertical marine plating.',
+      name: 'Anurag Tiwari',
+      role: 'Chief Robotics Architect & Lead Engineer',
+      credentials: 'Robotics & Autonomous Systems Specialist',
+      photo: '/images/anurag_tiwari.jpg',
+      bio: 'Pioneered 6-axis magnetic crawler kinematics, KRAN-VULCAN hardware architecture, and high-temp plasma torch dampening for vertical marine plating.',
     },
     {
       name: 'Elena Rostova',
