@@ -30,10 +30,10 @@ export default function ShipCuttingSimulationsPage() {
   const [telemetry, setTelemetry] = useState(null);
   const [safety, setSafety] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('robot-3d'); // 'robot-3d' | 'thermal-camera' | 'user-deployed' | 'online-gallery'
+  const [activeTab, setActiveTab] = useState('deployed-robot'); // 'deployed-robot' | 'robot-3d' | 'thermal-camera' | 'online-gallery'
   
-  // User deployed simulation website state
-  const defaultUserSim = 'https://threejs.org/examples/webgl_animation_skinning_blending.html';
+  // User deployed simulation website state (RoboFest Command Center)
+  const defaultUserSim = 'https://robo-fest-self.vercel.app/command-center';
   const [deployedSimUrl, setDeployedSimUrl] = useState(
     () => localStorage.getItem('USER_DEPLOYED_SIM_URL') || defaultUserSim
   );
@@ -191,20 +191,35 @@ export default function ShipCuttingSimulationsPage() {
       {/* Tabs Navigation */}
       <div className="flex flex-wrap items-center gap-2 border-b border-dark-border pb-3">
         <button
+          onClick={() => setActiveTab('deployed-robot')}
+          className={`px-4 py-2.5 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all ${
+            activeTab === 'deployed-robot'
+              ? 'bg-accent-cyan text-black shadow-glow font-bold scale-[1.02]'
+              : 'bg-neutral-900 text-neutral-300 hover:text-white border border-dark-border'
+          }`}
+        >
+          <Globe className="w-4 h-4 text-cyan-400" />
+          <span>RoboFest Command Center (Deployed Robot)</span>
+          <span className="px-1.5 py-0.5 rounded bg-black/70 text-[10px] font-mono border border-cyan-500/50 text-cyan-300">
+            LIVE
+          </span>
+        </button>
+
+        <button
           onClick={() => setActiveTab('robot-3d')}
-          className={`px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all ${
+          className={`px-4 py-2.5 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all ${
             activeTab === 'robot-3d'
               ? 'bg-accent-cyan text-black shadow-glow font-bold'
               : 'bg-neutral-900 text-neutral-300 hover:text-white border border-dark-border'
           }`}
         >
           <Bot className="w-4 h-4" />
-          <span>KRAN-VULCAN 3D (Ultrasonic Standoff & Cutting Robot)</span>
+          <span>KRAN-VULCAN 3D (Standoff & Chassis Simulation)</span>
         </button>
 
         <button
           onClick={() => setActiveTab('thermal-camera')}
-          className={`px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all ${
+          className={`px-4 py-2.5 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all ${
             activeTab === 'thermal-camera'
               ? 'bg-accent-cyan text-black shadow-glow font-bold'
               : 'bg-neutral-900 text-neutral-300 hover:text-white border border-dark-border'
@@ -215,20 +230,8 @@ export default function ShipCuttingSimulationsPage() {
         </button>
 
         <button
-          onClick={() => setActiveTab('user-deployed')}
-          className={`px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all ${
-            activeTab === 'user-deployed'
-              ? 'bg-accent-cyan text-black shadow-glow font-bold'
-              : 'bg-neutral-900 text-neutral-300 hover:text-white border border-dark-border'
-          }`}
-        >
-          <Globe className="w-4 h-4" />
-          <span>Your Deployed Simulation Website (Embed Slot)</span>
-        </button>
-
-        <button
           onClick={() => setActiveTab('online-gallery')}
-          className={`px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all ${
+          className={`px-4 py-2.5 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all ${
             activeTab === 'online-gallery'
               ? 'bg-accent-cyan text-black shadow-glow font-bold'
               : 'bg-neutral-900 text-neutral-300 hover:text-white border border-dark-border'
@@ -516,29 +519,42 @@ export default function ShipCuttingSimulationsPage() {
         </div>
       )}
 
-      {/* TAB 3: Your Deployed Simulation Website (The User's Column/Slot) */}
-      {activeTab === 'user-deployed' && (
+      {/* TAB 1: RoboFest Deployed Command Center (Separate Dedicated Embed) */}
+      {activeTab === 'deployed-robot' && (
         <div className="card-surface p-6 border border-dark-border bg-dark-card space-y-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-dark-border pb-4">
             <div>
               <div className="flex items-center gap-2">
-                <Globe className="w-5 h-5 text-accent-cyan" />
-                <h3 className="text-base font-bold text-white">Your Deployed Simulation Website</h3>
+                <Globe className="w-5 h-5 text-accent-cyan animate-pulse" />
+                <h3 className="text-base font-bold text-white">RoboFest Deployed Command Center</h3>
+                <span className="badge bg-emerald-950/80 border border-emerald-500/50 text-emerald-300 text-[10px] font-mono">
+                  LIVE ROBOT CUTTING
+                </span>
               </div>
               <p className="text-xs text-neutral-400 mt-1">
-                Enter your deployed 3D simulation link (Render, Vercel, Netlify, or Custom Domain). It will load in real time right here!
+                Embedded directly from your deployed web simulation (<span className="text-cyan-400 font-mono">https://robo-fest-self.vercel.app/command-center</span>).
               </p>
             </div>
 
-            <a
-              href={deployedSimUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-secondary text-xs flex items-center gap-1.5 self-start"
-            >
-              <span>Open in New Tab</span>
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
+            <div className="flex items-center gap-2.5 self-start">
+              <button
+                onClick={() => setIframeKey((k) => k + 1)}
+                className="btn-secondary text-xs flex items-center gap-1.5"
+                title="Reload Simulation Frame"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>Reload Frame</span>
+              </button>
+              <a
+                href={deployedSimUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-primary text-xs flex items-center gap-1.5 font-mono"
+              >
+                <span>Open Command Center</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            </div>
           </div>
 
           {/* URL Input Bar */}
@@ -548,27 +564,27 @@ export default function ShipCuttingSimulationsPage() {
                 type="url"
                 value={inputUrl}
                 onChange={(e) => setInputUrl(e.target.value)}
-                placeholder="https://your-robot-simulation.vercel.app"
+                placeholder="https://robo-fest-self.vercel.app/command-center"
                 className="w-full bg-neutral-900 border border-dark-border rounded-lg px-4 py-2.5 text-xs text-white font-mono placeholder-neutral-600 focus:outline-none focus:border-cyan-400"
               />
             </div>
             <button
               type="submit"
-              className="btn-primary text-xs px-6 py-2.5 flex items-center justify-center gap-2 font-mono whitespace-nowrap"
+              className="btn-secondary text-xs px-5 py-2.5 flex items-center justify-center gap-2 font-mono whitespace-nowrap"
             >
               <RefreshCw className="w-3.5 h-3.5" />
-              <span>Connect & Embed</span>
+              <span>Update URL</span>
             </button>
           </form>
 
-          {/* Embed Container */}
-          <div className="relative w-full aspect-[16/9] min-h-[480px] rounded-xl overflow-hidden border border-neutral-800 bg-black">
+          {/* Full-Height Embed Container */}
+          <div className="relative w-full min-h-[640px] h-[750px] rounded-2xl overflow-hidden border border-neutral-700 bg-black shadow-2xl">
             <iframe
               key={iframeKey}
               src={deployedSimUrl}
-              title="User Deployed Simulation"
+              title="RoboFest Command Center"
               className="w-full h-full border-0"
-              allow="fullscreen; accelerometer; gyroscope; xr-spatial-tracking"
+              allow="fullscreen; accelerometer; gyroscope; xr-spatial-tracking; clipboard-read; clipboard-write"
             />
 
             {/* Floating Top Status Indicator */}
