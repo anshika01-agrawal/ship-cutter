@@ -104,8 +104,16 @@ export default function PhotosPage() {
           >
             <div className="relative aspect-video bg-neutral-950 overflow-hidden">
               <img
-                src={photo.url?.startsWith('/uploads') ? `http://localhost:5000${photo.url}` : photo.url}
+                src={
+                  photo.url?.startsWith('/uploads')
+                    ? photo.url.replace('/uploads', '/images')
+                    : photo.url || '/images/plasma_cut_hull.jpg'
+                }
                 alt={photo.title}
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = '/images/plasma_cut_hull.jpg';
+                }}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 filter grayscale contrast-110 group-hover:grayscale-0"
               />
               <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -135,8 +143,16 @@ export default function PhotosPage() {
           >
             <div className="relative bg-black flex items-center justify-center max-h-[70vh]">
               <img
-                src={selectedPhoto.url?.startsWith('/uploads') ? `http://localhost:5000${selectedPhoto.url}` : selectedPhoto.url}
+                src={
+                  selectedPhoto.url?.startsWith('/uploads')
+                    ? selectedPhoto.url.replace('/uploads', '/images')
+                    : selectedPhoto.url || '/images/plasma_cut_hull.jpg'
+                }
                 alt={selectedPhoto.title}
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = '/images/plasma_cut_hull.jpg';
+                }}
                 className="max-h-[70vh] w-auto object-contain"
               />
               <button
