@@ -33,11 +33,16 @@ export default function ShipCuttingSimulationsPage() {
   const [activeTab, setActiveTab] = useState('deployed-robot'); // 'deployed-robot' | 'robot-3d' | 'thermal-camera' | 'online-gallery'
   
   // User deployed simulation website state (RoboFest Command Center)
-  const defaultUserSim = 'https://robo-fest-self.vercel.app/command-center';
-  const [deployedSimUrl, setDeployedSimUrl] = useState(
-    () => localStorage.getItem('USER_DEPLOYED_SIM_URL') || defaultUserSim
-  );
-  const [inputUrl, setInputUrl] = useState(deployedSimUrl);
+  const ROBOFEST_SIM_URL = 'https://robo-fest-self.vercel.app/command-center';
+  const [deployedSimUrl, setDeployedSimUrl] = useState(() => {
+    const saved = localStorage.getItem('USER_DEPLOYED_SIM_URL');
+    if (!saved || saved.includes('threejs.org') || !saved.includes('robo-fest')) {
+      localStorage.setItem('USER_DEPLOYED_SIM_URL', ROBOFEST_SIM_URL);
+      return ROBOFEST_SIM_URL;
+    }
+    return saved;
+  });
+  const [inputUrl, setInputUrl] = useState(ROBOFEST_SIM_URL);
   const [iframeKey, setIframeKey] = useState(0);
 
   // Curated online simulations
@@ -575,6 +580,18 @@ export default function ShipCuttingSimulationsPage() {
               <RefreshCw className="w-3.5 h-3.5" />
               <span>Update URL</span>
             </button>
+            <button
+              type="button"
+              onClick={() => {
+                setInputUrl(ROBOFEST_SIM_URL);
+                setDeployedSimUrl(ROBOFEST_SIM_URL);
+                localStorage.setItem('USER_DEPLOYED_SIM_URL', ROBOFEST_SIM_URL);
+                setIframeKey((k) => k + 1);
+              }}
+              className="btn-outline text-xs px-4 py-2.5 font-mono whitespace-nowrap text-cyan-400 border-cyan-800 hover:border-cyan-600"
+            >
+              Reset to RoboFest URL
+            </button>
           </form>
 
           {/* Full-Height Embed Container */}
@@ -668,27 +685,17 @@ setInterval(checkSafety, 2000);`}
                 </div>
 
                 <div className="pt-2 border-t border-neutral-800 flex items-center justify-between">
-                  <button
-                    onClick={() => {
-                      setInputUrl(sim.url);
-                      setDeployedSimUrl(sim.url);
-                      setActiveTab('user-deployed');
-                    }}
-                    className="btn-primary text-xs py-1.5 px-3 flex items-center gap-1.5 font-mono"
-                  >
-                    <span>Load in Embed Frame</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-
                   <a
                     href={sim.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-neutral-400 hover:text-white p-1"
-                    title="Open in new window"
+                    className="btn-primary text-xs py-1.5 px-3 flex items-center gap-1.5 font-mono"
                   >
-                    <ExternalLink className="w-4 h-4" />
+                    <span>Launch 3D Demo</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
                   </a>
+
+                  <span className="text-[10px] text-neutral-500 font-mono">External WebGL</span>
                 </div>
               </div>
             ))}

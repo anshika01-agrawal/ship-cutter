@@ -45,7 +45,8 @@ export default function App() {
           <Route index element={<DashboardPage />} />
           <Route path="sensors" element={<SensorsPage />} />
           <Route path="ship-cutting-simulations" element={<ShipCuttingSimulationsPage />} />
-          <Route path="simulation" element={<ShipCuttingSimulationsPage />} />
+          <Route path="simulation" element={<SimulationBridgePage />} />
+          <Route path="safety-bridge" element={<SimulationBridgePage />} />
           <Route path="database" element={<DatabaseViewerPage />} />
           <Route path="parts" element={<PartTrackingPage />} />
           <Route path="materials" element={<MaterialPage />} />

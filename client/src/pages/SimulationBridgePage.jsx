@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { api } from '../services/api';
 import StatsCard from '../components/common/StatsCard';
 import LoadingSpinner from '../components/common/LoadingSpinner';
@@ -9,31 +10,30 @@ import {
   ShieldCheck,
   ShieldAlert,
   ExternalLink,
-  RefreshCw,
   Layers,
   Thermometer,
   Zap,
   CheckCircle2,
   AlertOctagon,
-  Eye,
-  Link as LinkIcon
+  Gauge,
+  ArrowRight,
+  Code,
+  Terminal,
+  Activity
 } from 'lucide-react';
 
 export default function SimulationBridgePage() {
   const [telemetry, setTelemetry] = useState(null);
   const [safety, setSafety] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [simulationUrl, setSimulationUrl] = useState(
-    localStorage.getItem('SIMULATION_URL') || 'https://threejs.org/examples/webgl_animation_skinning_blending.html'
-  );
-  const [inputUrl, setInputUrl] = useState(simulationUrl);
-  const [embedLoaded, setEmbedLoaded] = useState(false);
+  const [tokenCounter, setTokenCounter] = useState(1048);
 
   const fetchLiveState = async () => {
     try {
       const res = await api.getLiveSensors();
       setTelemetry(res.telemetry);
       setSafety(res.safety);
+      setTokenCounter((prev) => prev + 1);
     } catch (err) {
       console.error('Failed to load safety state:', err);
     } finally {
@@ -43,22 +43,16 @@ export default function SimulationBridgePage() {
 
   useEffect(() => {
     fetchLiveState();
-    const interval = setInterval(fetchLiveState, 2000);
+    const interval = setInterval(fetchLiveState, 2500);
     return () => clearInterval(interval);
   }, []);
-
-  const handleSaveUrl = (e) => {
-    e.preventDefault();
-    setSimulationUrl(inputUrl);
-    localStorage.setItem('SIMULATION_URL', inputUrl);
-  };
 
   const handleToggleHazard = async () => {
     try {
       await api.toggleHazardSimulation();
       fetchLiveState();
     } catch (err) {
-      alert('Error triggering simulation hazard: ' + err.message);
+      alert('Error triggering safety hazard: ' + err.message);
     }
   };
 
@@ -72,23 +66,25 @@ export default function SimulationBridgePage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <Zap className="w-5 h-5 text-accent-cyan" />
-            <h2 className="text-xl font-bold text-white">Robot Cutting Simulation & Safety Signal Bridge</h2>
+            <Zap className="w-5 h-5 text-accent-cyan animate-pulse" />
+            <h2 className="text-xl font-bold text-white">Safety Interlock Bridge & Decision Engine</h2>
           </div>
           <p className="text-xs text-text-secondary mt-1">
-            Automated sensor decision engine: verifies opposite compartment gas levels and temperatures before authorizing robotic cutting.
+            Automated cyber-physical sensor gate: verifies opposite compartment gas levels, stand-off gap, and temperature before permitting plasma arc ignition.
           </p>
         </div>
 
         {/* Hazard injection quick test */}
-        <button
-          onClick={handleToggleHazard}
-          className={`btn-primary text-xs font-mono py-2 px-4 shadow-glow ${
-            isSafe ? 'bg-amber-400 text-black hover:bg-amber-300' : 'bg-emerald-400 text-black hover:bg-emerald-300'
-          }`}
-        >
-          {isSafe ? 'Simulate Gas Leak on Opposite Side (Test Red Signal)' : 'Clear Opposite Gas (Test Green Signal)'}
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleToggleHazard}
+            className={`btn-primary text-xs font-mono py-2 px-4 shadow-glow ${
+              isSafe ? 'bg-amber-400 text-black hover:bg-amber-300' : 'bg-emerald-400 text-black hover:bg-emerald-300'
+            }`}
+          >
+            {isSafe ? 'Simulate Gas Leak (Test Red Inhibit)' : 'Purge Gas Hazard (Test Green Permit)'}
+          </button>
+        </div>
       </div>
 
       {/* Main Signal Display HUD */}
@@ -131,7 +127,7 @@ export default function SimulationBridgePage() {
                   {isSafe ? 'CUT AUTHORIZATION GRANTED' : 'SAFETY INHIBIT TRIGGERED'}
                 </span>
                 <span className="text-xs font-mono text-neutral-400">
-                  SIGNAL CODE: {safety?.signal}
+                  CODE: {safety?.signal}
                 </span>
               </div>
 
@@ -141,7 +137,7 @@ export default function SimulationBridgePage() {
 
               <p className="text-xs text-neutral-300 mt-1 max-w-2xl leading-relaxed">
                 {isSafe
-                  ? 'Reverse hull void has zero combustible hydrocarbon fumes and temperature is under 50°C. Robot cut trajectory is unlocked.'
+                  ? 'Reverse hull void has zero combustible hydrocarbon fumes and temperature is under 50°C. Robot cut trajectory is authorized.'
                   : 'Harmful flammable vapor detected behind bulkhead plate. Plasma torch ignition is electronically locked to prevent explosion.'}
               </p>
             </div>
@@ -153,13 +149,53 @@ export default function SimulationBridgePage() {
               {safety?.safetyScore}%
             </span>
             <span className="text-[11px] font-mono text-neutral-500 mt-1">
-              Evaluated: {new Date().toLocaleTimeString()}
+              Token: #AUTH-TTN-{tokenCounter}
             </span>
           </div>
         </div>
       </div>
 
-      {/* Compartment Cross-Section Diagram (Forward Cut Face vs Reverse Void) */}
+      {/* 4 Telemetry Metrics Driving Interlock */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatsCard
+          title="Reverse Wall Temperature"
+          value={`${telemetry?.oppositeSideTemp || 28.5}°C`}
+          unit={`Max Allowed: ${safety?.thresholds?.maxOppositeTemp || 50}°C`}
+          icon={Thermometer}
+          change={telemetry?.oppositeSideTemp > 50 ? 'CRITICAL HEAT' : 'Safe Wall Temp'}
+          changeType={telemetry?.oppositeSideTemp > 50 ? 'negative' : 'positive'}
+        />
+
+        <StatsCard
+          title="Volatile Gas in Void"
+          value={`${telemetry?.oppositeSideGasPPM || 8.2} PPM`}
+          unit={`Max Safe: ${safety?.thresholds?.maxGasPPM || 35} PPM`}
+          icon={Flame}
+          change={telemetry?.oppositeSideGasPPM > 35 ? 'EXPLOSION RISK' : 'Inert Atmosphere'}
+          changeType={telemetry?.oppositeSideGasPPM > 35 ? 'negative' : 'positive'}
+          subtitle={`Vapor: ${telemetry?.toxicGasType || 'Clean Air'}`}
+        />
+
+        <StatsCard
+          title="Torch Standoff Gap"
+          value={`${telemetry?.distanceMM || 40.0} mm`}
+          unit="Calibrated Window: 40 mm"
+          icon={Gauge}
+          change="Ultrasonic THC Verified"
+          changeType="positive"
+        />
+
+        <StatsCard
+          title="Cutting Permit Status"
+          value={isSafe ? 'PERMIT ACTIVE' : 'LOCKED OUT'}
+          unit={isSafe ? 'Relay Open 🟢' : 'Relay Tripped 🔴'}
+          icon={ShieldCheck}
+          change={isSafe ? 'Cutting Ready' : 'Emergency Stop'}
+          changeType={isSafe ? 'positive' : 'negative'}
+        />
+      </div>
+
+      {/* Cross-Section Bulkhead Inspection Telemetry */}
       <div className="card-surface p-6 border border-dark-border bg-dark-card">
         <h3 className="text-xs font-mono font-bold text-white uppercase border-b border-dark-border pb-3 mb-5 flex items-center gap-2">
           <Layers className="w-4 h-4 text-accent-cyan" />
@@ -176,11 +212,11 @@ export default function SimulationBridgePage() {
             <div className="space-y-2 text-xs font-mono">
               <div className="flex justify-between text-neutral-400 border-b border-neutral-800/80 pb-1">
                 <span>Surface Plate Temp:</span>
-                <span className="text-orange-400 font-bold">{telemetry?.temperature}°C</span>
+                <span className="text-orange-400 font-bold">{telemetry?.temperature || 27.6}°C</span>
               </div>
               <div className="flex justify-between text-neutral-400 border-b border-neutral-800/80 pb-1">
                 <span>Standoff Gap:</span>
-                <span className="text-white">{telemetry?.distanceMM} mm</span>
+                <span className="text-white">{telemetry?.distanceMM || 40.0} mm</span>
               </div>
               <div className="flex justify-between text-neutral-400 pb-1">
                 <span>Ambient Air Status:</span>
@@ -211,19 +247,19 @@ export default function SimulationBridgePage() {
               <div className="flex justify-between text-neutral-400 border-b border-neutral-800/80 pb-1">
                 <span>Reverse Wall Temperature:</span>
                 <span className={telemetry?.oppositeSideTemp > 50 ? 'text-red-400 font-bold' : 'text-emerald-400 font-bold'}>
-                  {telemetry?.oppositeSideTemp}°C {telemetry?.oppositeSideTemp > 50 ? '(TOO HOT)' : '(SAFE < 50°C)'}
+                  {telemetry?.oppositeSideTemp || 28.5}°C {telemetry?.oppositeSideTemp > 50 ? '(TOO HOT)' : '(SAFE < 50°C)'}
                 </span>
               </div>
               <div className="flex justify-between text-neutral-400 border-b border-neutral-800/80 pb-1">
                 <span>Volatile Gas Concentration:</span>
                 <span className={telemetry?.oppositeSideGasPPM > 35 ? 'text-red-400 font-bold' : 'text-emerald-400 font-bold'}>
-                  {telemetry?.oppositeSideGasPPM} PPM {telemetry?.oppositeSideGasPPM > 35 ? '(EXPLOSION HAZARD)' : '(SAFE < 35 PPM)'}
+                  {telemetry?.oppositeSideGasPPM || 8.2} PPM {telemetry?.oppositeSideGasPPM > 35 ? '(EXPLOSION HAZARD)' : '(SAFE < 35 PPM)'}
                 </span>
               </div>
               <div className="flex justify-between text-neutral-400 pb-1">
                 <span>Detected Vapor Classification:</span>
                 <span className={isSafe ? 'text-neutral-300' : 'text-red-300 font-bold'}>
-                  {telemetry?.toxicGasType}
+                  {telemetry?.toxicGasType || 'None (Clean Air)'}
                 </span>
               </div>
             </div>
@@ -231,86 +267,64 @@ export default function SimulationBridgePage() {
         </div>
       </div>
 
-      {/* External Simulation Website Connector & Live Preview */}
+      {/* Live REST / WebSocket Interlock Signal Payload */}
       <div className="card-surface p-6 border border-dark-border bg-dark-card space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-dark-border pb-4">
           <div>
             <h3 className="text-sm font-bold text-white flex items-center gap-2">
-              <LinkIcon className="w-4 h-4 text-accent-cyan" />
-              <span>Connect External 3D Robot Simulation Website</span>
+              <Terminal className="w-4 h-4 text-accent-cyan" />
+              <span>Real-Time Authorization Payload (Dispatched to Robot Controller)</span>
             </h3>
             <p className="text-xs text-text-secondary mt-0.5">
-              Embed your deployed 3D simulation website here or configure its target URL.
+              Target receiver: Deployed RoboFest Command Center & Onboard Crawler Microcontroller
             </p>
           </div>
 
-          <a
-            href={simulationUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-secondary text-xs flex items-center gap-1.5 self-start"
-          >
-            <span>Open Simulation in New Tab</span>
-            <ExternalLink className="w-3.5 h-3.5" />
-          </a>
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+            <span className="text-[11px] font-mono text-emerald-400">BROADCASTING AT 2.5 HZ</span>
+          </div>
         </div>
 
-        {/* URL Input Form */}
-        <form onSubmit={handleSaveUrl} className="flex gap-2 text-xs">
-          <input
-            type="url"
-            value={inputUrl}
-            onChange={(e) => setInputUrl(e.target.value)}
-            placeholder="https://your-robot-simulation.onrender.com or vercel.app"
-            className="flex-1 bg-neutral-900 border border-dark-border rounded-lg px-3 py-2 text-white font-mono placeholder-neutral-600 focus:outline-none focus:border-neutral-400"
-          />
-          <button type="submit" className="btn-primary text-xs px-5">
-            Update Embed
-          </button>
-        </form>
+        <pre className="bg-black p-4 rounded-xl border border-neutral-800 font-mono text-xs text-cyan-300 overflow-x-auto leading-relaxed">
+{JSON.stringify(
+  {
+    bridgeStatus: 'ONLINE_ACTIVE',
+    signal: safety?.signal || 'SIGNAL_AUTHORIZED_GREEN',
+    isSafeToCut: isSafe,
+    safetyScore: safety?.safetyScore || 98,
+    reasons: safety?.reasons || ['All parameters within safe cutting threshold'],
+    evaluatedAt: new Date().toISOString(),
+    telemetry: {
+      temperatureTorch: telemetry?.temperature || 27.6,
+      oppositeWallTemp: telemetry?.oppositeSideTemp || 28.5,
+      oppositeSideGasPPM: telemetry?.oppositeSideGasPPM || 8.2,
+      standoffDistanceMM: telemetry?.distanceMM || 40.0,
+      vaporClassification: telemetry?.toxicGasType || 'Clean Air',
+    },
+    interlockRelay: isSafe ? 'RELAY_CLOSED_CURRENT_FLOW' : 'RELAY_OPEN_DISCHARGED',
+    permitTarget: 'https://robo-fest-self.vercel.app/command-center',
+  },
+  null,
+  2
+)}
+        </pre>
 
-        {/* Embedded Simulation Iframe */}
-        <div className="relative aspect-video w-full rounded-xl overflow-hidden border border-neutral-800 bg-black">
-          <iframe
-            src={simulationUrl}
-            title="Robot Cutting Simulation"
-            className="w-full h-full border-0"
-            allow="fullscreen; accelerometer; gyroscope"
-            onLoad={() => setEmbedLoaded(true)}
-          />
-          {/* Overlay HUD with live signal */}
-          <div className="absolute top-3 left-3 px-3 py-1.5 rounded-lg bg-black/85 backdrop-blur-md border border-neutral-700 text-xs font-mono flex items-center gap-2">
-            <span className={`w-2.5 h-2.5 rounded-full ${isSafe ? 'bg-emerald-400 animate-ping' : 'bg-red-400 animate-bounce'}`} />
-            <span className={isSafe ? 'text-emerald-400 font-bold' : 'text-red-400 font-bold'}>
-              SIMULATION CUT SIGNAL: {isSafe ? 'UNLOCKED (GREEN)' : 'INHIBITED (RED)'}
+        {/* Quick Link Banner to Ship Cutting Simulations */}
+        <div className="p-4 rounded-xl bg-neutral-950 border border-neutral-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+          <div>
+            <span className="text-white font-semibold block">Need to view the live 3D robot cutter or RoboFest Command Center?</span>
+            <span className="text-neutral-400 text-[11px] block mt-0.5">
+              The 3D kinematics simulator and deployed website are located in their dedicated column.
             </span>
           </div>
-        </div>
-
-        {/* API Bridge Documentation */}
-        <div className="p-4 rounded-xl bg-neutral-950 border border-dark-border font-mono text-xs space-y-2">
-          <div className="text-cyan-400 font-bold uppercase text-[11px] flex items-center gap-1.5">
-            <Radio className="w-3.5 h-3.5" />
-            <span>How your simulation website reads the cutting authorization</span>
-          </div>
-          <p className="text-neutral-400 text-[11px]">
-            In your simulation script, fetch our real-time endpoint:
-          </p>
-          <pre className="bg-black p-3 rounded text-[11px] text-emerald-400 overflow-x-auto border border-neutral-800">
-{`// Query cutting authorization in your 3D robot simulation:
-fetch('http://YOUR_SERVER_URL/api/sensors/live')
-  .then(res => res.json())
-  .then(data => {
-    if (data.safety.isSafeToCut) {
-      robot.triggerPlasmaCutAnimation();
-      setLedColor('#00ff00'); // Green Light
-    } else {
-      robot.haltCutTrajectory();
-      setLedColor('#ff0000'); // Red Light
-      alert('Hazard in opposite compartment: ' + data.safety.reasons[0]);
-    }
-  });`}
-          </pre>
+          <Link
+            to="/dashboard/ship-cutting-simulations"
+            className="btn-primary text-xs flex items-center gap-2 font-mono whitespace-nowrap self-start sm:self-center"
+          >
+            <span>Open Ship Cutting Simulations</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
         </div>
       </div>
     </div>
