@@ -594,8 +594,29 @@ export default function ShipCuttingSimulationsPage() {
             </button>
           </form>
 
-          {/* Full-Height Embed Container */}
-          <div className="relative w-full min-h-[640px] h-[750px] rounded-2xl overflow-hidden border border-neutral-700 bg-black shadow-2xl">
+          {/* Dedicated Bridge Status Strip above the Iframe (Zero Overlap) */}
+          <div className="p-3 px-4 rounded-xl bg-neutral-950 border border-neutral-800 flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
+            <div className="flex items-center gap-3">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${isSafe ? 'bg-emerald-400' : 'bg-red-400'} opacity-75`} />
+                <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${isSafe ? 'bg-emerald-500' : 'bg-red-500'}`} />
+              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-neutral-400 uppercase text-[11px]">TITAN-OS BRIDGE SIGNAL:</span>
+                <span className={`font-bold ${isSafe ? 'text-emerald-400' : 'text-red-400'}`}>
+                  {isSafe ? 'GREEN: CUTTING AUTHORIZED' : 'RED: CUTTING INHIBITED'}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 text-[11px] text-neutral-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+              <span>Target: <strong className="text-cyan-300">{deployedSimUrl}</strong></span>
+            </div>
+          </div>
+
+          {/* Full-Height Embed Container (100% Clean & Unobstructed) */}
+          <div className="relative w-full min-h-[640px] h-[780px] rounded-2xl overflow-hidden border border-neutral-700 bg-black shadow-2xl">
             <iframe
               key={iframeKey}
               src={deployedSimUrl}
@@ -603,22 +624,6 @@ export default function ShipCuttingSimulationsPage() {
               className="w-full h-full border-0"
               allow="fullscreen; accelerometer; gyroscope; xr-spatial-tracking; clipboard-read; clipboard-write"
             />
-
-            {/* Floating Top Status Indicator */}
-            <div className="absolute top-4 left-4 p-2.5 rounded-xl bg-black/85 backdrop-blur-md border border-neutral-700 text-xs font-mono flex items-center gap-3 shadow-2xl">
-              <span className={`w-3 h-3 rounded-full ${isSafe ? 'bg-emerald-400 animate-ping' : 'bg-red-400 animate-bounce'}`} />
-              <div>
-                <span className="text-[10px] text-neutral-400 uppercase block">LIVE TITAN-OS BRIDGE SIGNAL</span>
-                <span className={`text-xs font-bold ${isSafe ? 'text-emerald-400' : 'text-red-400'}`}>
-                  {isSafe ? 'GREEN: CUTTING AUTHORIZED' : 'RED: CUTTING INHIBITED'}
-                </span>
-              </div>
-            </div>
-
-            {/* Quick URL Indicator Pill */}
-            <div className="absolute top-4 right-4 px-3 py-1.5 rounded-xl bg-black/80 backdrop-blur-md border border-neutral-800 text-[11px] font-mono text-neutral-300 hidden sm:block">
-              Embedded: <span className="text-cyan-400">{deployedSimUrl}</span>
-            </div>
           </div>
 
           {/* Integration Guide for the User's Website */}
