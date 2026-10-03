@@ -16,6 +16,7 @@ import AnimatedSection from '../common/AnimatedSection';
 export default function HowItWorksSection() {
   const [activeStep, setActiveStep] = useState(0);
   const [activeSubImg, setActiveSubImg] = useState(0);
+  const [isColor, setIsColor] = useState(false);
 
   const steps = [
     {
@@ -206,11 +207,16 @@ export default function HowItWorksSection() {
 
             {/* Right 5 cols: High-Res Step Image with HUD overlay */}
             <div className="lg:col-span-5 space-y-3">
-              <div className="relative aspect-square sm:aspect-video lg:aspect-[4/3] rounded-xl overflow-hidden border border-neutral-700 bg-black group shadow-glow-sm">
+              <div
+                onClick={() => setIsColor(!isColor)}
+                className="relative aspect-square sm:aspect-video lg:aspect-[4/3] rounded-xl overflow-hidden border border-neutral-700 bg-black group shadow-glow-sm cursor-pointer"
+              >
                 <img
                   src={current.images ? current.images[activeSubImg]?.url : current.image}
                   alt={current.title}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 filter contrast-110"
+                  className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-105 ${
+                    isColor ? 'filter-none' : 'filter grayscale contrast-110 group-hover:grayscale-0'
+                  }`}
                   onError={(e) => {
                     e.currentTarget.onerror = null;
                     e.currentTarget.src = '/images/kran_vulcan_crawler.jpg';
@@ -222,6 +228,11 @@ export default function HowItWorksSection() {
                 <div className="absolute top-3 left-3 px-2.5 py-1 rounded bg-black/85 backdrop-blur-md border border-neutral-700 text-[10px] font-mono text-cyan-300 flex items-center gap-1.5">
                   <span className={`w-2 h-2 rounded-full ${current.images ? 'bg-red-500 animate-pulse' : 'bg-emerald-400'}`} />
                   {current.images ? 'MANUAL HAZARD ARCHIVE' : 'FEED: ACTIVE • SENSORS OK'}
+                </div>
+
+                <div className="absolute top-3 right-3 px-2 py-0.5 rounded bg-black/80 backdrop-blur-md border border-neutral-700 text-[9px] font-mono text-neutral-300 flex items-center gap-1">
+                  <span className={`w-1.5 h-1.5 rounded-full ${isColor ? 'bg-emerald-400' : 'bg-neutral-500'}`} />
+                  <span>{isColor ? 'COLOR ACTIVE' : 'CLICK FOR COLOR'}</span>
                 </div>
 
                 <div className="absolute bottom-4 left-4 right-4">
@@ -240,7 +251,10 @@ export default function HowItWorksSection() {
                   {current.images.map((imgObj, i) => (
                     <button
                       key={imgObj.url}
-                      onClick={() => setActiveSubImg(i)}
+                      onClick={() => {
+                        setActiveSubImg(i);
+                        setIsColor(false);
+                      }}
                       className={`p-2 rounded-lg border text-left transition-all flex items-center gap-2.5 ${
                         activeSubImg === i
                           ? 'border-red-500 bg-red-950/40 shadow-glow-sm ring-1 ring-red-500/50'
@@ -250,7 +264,9 @@ export default function HowItWorksSection() {
                       <img
                         src={imgObj.url}
                         alt="thumb"
-                        className="w-10 h-10 object-cover rounded border border-neutral-700 shrink-0"
+                        className={`w-10 h-10 object-cover rounded border border-neutral-700 shrink-0 transition-all ${
+                          activeSubImg === i && isColor ? 'filter-none' : 'filter grayscale group-hover:grayscale-0'
+                        }`}
                       />
                       <div className="min-w-0">
                         <span className="text-[10px] font-mono font-bold text-red-400 block">Hazard #{i + 1}</span>
