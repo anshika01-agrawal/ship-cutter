@@ -21,8 +21,9 @@ import {
 export default function Sidebar({ isOpen, onClose }) {
   const navItems = [
     { label: 'Real-time Cutting', path: '/dashboard', icon: Flame, badge: 'Live' },
+    { label: 'Ship Cutting Simulations', path: '/dashboard/ship-cutting-simulations', icon: Bot, badge: '3D', highlight: true },
     { label: 'ESP32 / Adafruit Sensors', path: '/dashboard/sensors', icon: Radio, badge: 'IoT' },
-    { label: 'Simulation & Safety Bridge', path: '/dashboard/simulation', icon: Zap, highlight: true },
+    { label: 'Safety Interlock Bridge', path: '/dashboard/simulation', icon: Zap },
     { label: 'Part Tracking', path: '/dashboard/parts', icon: Layers },
     { label: 'Material Analysis', path: '/dashboard/materials', icon: PieChart },
     { label: 'Robot Maintenance', path: '/dashboard/maintenance', icon: Wrench },

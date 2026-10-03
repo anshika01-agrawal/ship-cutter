@@ -25,6 +25,7 @@ import ChatbotPage from './pages/ChatbotPage';
 import SensorsPage from './pages/SensorsPage';
 import SimulationBridgePage from './pages/SimulationBridgePage';
 import DatabaseViewerPage from './pages/DatabaseViewerPage';
+import ShipCuttingSimulationsPage from './pages/ShipCuttingSimulationsPage';
 
 export default function App() {
   return (
@@ -43,7 +44,8 @@ export default function App() {
         <Route path="/dashboard" element={<DashboardLayout />}>
           <Route index element={<DashboardPage />} />
           <Route path="sensors" element={<SensorsPage />} />
-          <Route path="simulation" element={<SimulationBridgePage />} />
+          <Route path="ship-cutting-simulations" element={<ShipCuttingSimulationsPage />} />
+          <Route path="simulation" element={<ShipCuttingSimulationsPage />} />
           <Route path="database" element={<DatabaseViewerPage />} />
           <Route path="parts" element={<PartTrackingPage />} />
           <Route path="materials" element={<MaterialPage />} />
