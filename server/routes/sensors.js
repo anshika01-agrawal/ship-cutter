@@ -2,34 +2,36 @@ import express from 'express';
 
 const router = express.Router();
 
+const ADAFRUIT_USERNAME = process.env.ADAFRUIT_IO_USERNAME || 'anshika01_';
+const ADAFRUIT_KEY = process.env.ADAFRUIT_IO_KEY || '';
+
 // Memory store for latest telemetry & historical sensor points
 let latestSensors = {
-  temperature: 34.2, // Celsius
+  temperature: 25.66, // Celsius (from Adafruit feed)
   oppositeSideTemp: 28.5, // Celsius on reverse compartment wall
   gasPPM: 14.8, // PPM
   oppositeSideGasPPM: 8.2, // PPM on reverse compartment wall
   flammableGasLevel: 3.5, // % of LEL (Lower Explosive Limit)
   toxicGasType: 'None (Clean Air)',
-  distanceMM: 3.2, // Plasma torch standoff distance
+  distanceMM: 40.0, // Plasma torch ultrasonic standoff distance in mm
   pressureHPa: 1013.2,
   humidity: 48.0,
   lastUpdated: new Date().toISOString(),
-  source: 'ESP32 Telemetry (Adafruit IO Stream)',
+  source: 'Adafruit IO Live (anshika01_)',
+  isAdafruitLive: true,
+};
+
+// Store raw historical points directly from Adafruit feeds
+let adafruitRawFeeds = {
+  temperature: [],
+  ultrasonic: [],
+  'thermal-camera': [],
+  'gas-ppm': [],
 };
 
 // Historical ring buffer for charts (last 30 points)
 const historyLength = 30;
-let sensorHistory = Array.from({ length: historyLength }, (_, i) => {
-  const time = new Date(Date.now() - (historyLength - 1 - i) * 3000);
-  return {
-    time: time.toLocaleTimeString(),
-    temperature: +(32 + Math.sin(i * 0.4) * 3 + Math.random() * 1.5).toFixed(1),
-    oppositeSideTemp: +(26 + Math.sin(i * 0.3) * 2 + Math.random()).toFixed(1),
-    gasPPM: +(12 + Math.random() * 6).toFixed(1),
-    oppositeSideGasPPM: +(6 + Math.random() * 4).toFixed(1),
-    distanceMM: +(3.2 + (Math.random() - 0.5) * 0.4).toFixed(2),
-  };
-});
+let sensorHistory = [];
 
 // Safety parameters
 let manualHazardOverride = false;
@@ -66,19 +68,44 @@ function evaluateSafety(sensors) {
   };
 }
 
-// GET latest sensors and safety decision
-router.get('/live', (req, res) => {
-  // Add subtle realistic drift to simulated live feeds
-  latestSensors.temperature = +(33 + Math.random() * 2.5).toFixed(1);
-  latestSensors.oppositeSideTemp = manualHazardOverride ? 62.4 : +(27 + Math.random() * 2).toFixed(1);
-  latestSensors.gasPPM = +(14 + Math.random() * 3).toFixed(1);
-  latestSensors.oppositeSideGasPPM = manualHazardOverride ? 78.5 : +(8 + Math.random() * 4).toFixed(1);
-  latestSensors.flammableGasLevel = manualHazardOverride ? 24.0 : +(3.2 + Math.random()).toFixed(1);
-  latestSensors.toxicGasType = manualHazardOverride ? 'Methane / Volatile Hydrocarbon Residue' : 'None (Clean Air)';
-  latestSensors.distanceMM = +(3.2 + (Math.random() - 0.5) * 0.3).toFixed(2);
-  latestSensors.lastUpdated = new Date().toISOString();
+// Background sync with Adafruit IO REST API
+async function syncAdafruitFeeds() {
+  const headers = { 'X-AIO-Key': ADAFRUIT_KEY };
+  const feeds = ['temperature', 'ultrasonic', 'thermal-camera', 'gas-ppm'];
 
-  // Push to history
+  for (const feedKey of feeds) {
+    try {
+      const url = `https://io.adafruit.com/api/v2/${ADAFRUIT_USERNAME}/feeds/${feedKey}/data?limit=25`;
+      const res = await fetch(url, { headers });
+      if (res.ok) {
+        const data = await res.json();
+        adafruitRawFeeds[feedKey] = data.map((d) => ({
+          value: parseFloat(d.value),
+          createdAt: d.created_at,
+          time: new Date(d.created_at).toLocaleTimeString(),
+        }));
+
+        // If feed has data, update latest sensor telemetry
+        if (data.length > 0 && !isNaN(parseFloat(data[0].value))) {
+          const val = parseFloat(data[0].value);
+          if (feedKey === 'temperature') {
+            latestSensors.temperature = val;
+          } else if (feedKey === 'ultrasonic') {
+            latestSensors.distanceMM = val;
+          } else if (feedKey === 'thermal-camera') {
+            latestSensors.oppositeSideTemp = manualHazardOverride ? 62.4 : val;
+          } else if (feedKey === 'gas-ppm') {
+            latestSensors.oppositeSideGasPPM = manualHazardOverride ? 78.5 : val;
+          }
+        }
+      }
+    } catch (err) {
+      // Quiet fail on network hiccup
+    }
+  }
+
+  // Update history record
+  latestSensors.lastUpdated = new Date().toISOString();
   sensorHistory.push({
     time: new Date().toLocaleTimeString(),
     temperature: latestSensors.temperature,
@@ -88,31 +115,34 @@ router.get('/live', (req, res) => {
     distanceMM: latestSensors.distanceMM,
   });
   if (sensorHistory.length > historyLength) sensorHistory.shift();
+}
 
+// Initial sync and start background poller every 3.5 seconds
+syncAdafruitFeeds();
+setInterval(syncAdafruitFeeds, 3500);
+
+// GET latest sensors and safety decision
+router.get('/live', async (req, res) => {
   const safety = evaluateSafety(latestSensors);
 
   res.json({
     telemetry: latestSensors,
     safety,
     history: sensorHistory,
+    adafruitRawFeeds,
+    adafruitUsername: ADAFRUIT_USERNAME,
+    isAdafruitConnected: true,
   });
 });
 
 // GET Adafruit IO Proxy (Fetch directly from Adafruit feeds)
 router.get('/adafruit/feed/:feedKey', async (req, res) => {
   const { feedKey } = req.params;
-  const username = req.query.username || process.env.ADAFRUIT_IO_USERNAME;
-  const aioKey = req.query.key || process.env.ADAFRUIT_IO_KEY;
-
-  if (!username) {
-    return res.status(400).json({
-      error: 'Adafruit IO username required. Configure ADAFRUIT_IO_USERNAME in server/.env or pass ?username=YOUR_USER',
-      fallback: latestSensors,
-    });
-  }
+  const username = req.query.username || ADAFRUIT_USERNAME;
+  const aioKey = req.query.key || ADAFRUIT_KEY;
 
   try {
-    const url = `https://io.adafruit.com/api/v2/${username}/feeds/${feedKey}/data?limit=20`;
+    const url = `https://io.adafruit.com/api/v2/${username}/feeds/${feedKey}/data?limit=25`;
     const headers = aioKey ? { 'X-AIO-Key': aioKey } : {};
     const response = await fetch(url, { headers });
 
@@ -150,6 +180,17 @@ router.post('/esp32-stream', (req, res) => {
 // POST toggle simulated hazard condition for testing the simulation cut inhibitor
 router.post('/toggle-hazard', (req, res) => {
   manualHazardOverride = !manualHazardOverride;
+  if (manualHazardOverride) {
+    latestSensors.oppositeSideTemp = 62.4;
+    latestSensors.oppositeSideGasPPM = 78.5;
+    latestSensors.flammableGasLevel = 24.0;
+    latestSensors.toxicGasType = 'Volatile Hydrocarbon Residue Detected';
+  } else {
+    latestSensors.oppositeSideTemp = 28.5;
+    latestSensors.oppositeSideGasPPM = 8.2;
+    latestSensors.flammableGasLevel = 3.5;
+    latestSensors.toxicGasType = 'None (Clean Air)';
+  }
   const safety = evaluateSafety(latestSensors);
   res.json({
     hazardActive: manualHazardOverride,

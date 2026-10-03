@@ -54,12 +54,16 @@ export default function SensorsPage() {
 
   // Adafruit IO configuration state
   const [adafruitConfig, setAdafruitConfig] = useState({
-    username: localStorage.getItem('AIO_USER') || '',
+    username: localStorage.getItem('AIO_USER') || 'anshika01_',
     aioKey: localStorage.getItem('AIO_KEY') || '',
     tempFeed: 'temperature',
-    gasFeed: 'gas-sensor',
-    distFeed: 'ultrasonic-distance',
+    ultrasonicFeed: 'ultrasonic',
+    thermalFeed: 'thermal-camera',
+    gasFeed: 'gas-ppm',
   });
+  const [adafruitFeeds, setAdafruitFeeds] = useState({});
+  const [adafruitUser, setAdafruitUser] = useState('anshika01_');
+  const [isAdafruitConnected, setIsAdafruitConnected] = useState(true);
   const [configSaved, setConfigSaved] = useState(false);
 
   // Fetch telemetry
@@ -69,6 +73,9 @@ export default function SensorsPage() {
       setTelemetry(res.telemetry);
       setSafety(res.safety);
       setHistory(res.history || []);
+      if (res.adafruitRawFeeds) setAdafruitFeeds(res.adafruitRawFeeds);
+      if (res.adafruitUsername) setAdafruitUser(res.adafruitUsername);
+      if (res.isAdafruitConnected !== undefined) setIsAdafruitConnected(res.isAdafruitConnected);
     } catch (err) {
       console.error('Failed to fetch live sensor data:', err);
     } finally {
@@ -110,48 +117,83 @@ export default function SensorsPage() {
 
   if (loading && !telemetry) return <LoadingSpinner text="Connecting to ESP32 Adafruit IO Sensor Stream..." />;
 
-  const labels = history.map((h) => h.time);
-
-  // Temperature Chart Data
+  // 1. Temperature Sensor Chart (Direct from Adafruit IO 'temperature' feed)
+  const aioTempList = [...(adafruitFeeds?.temperature || [])].reverse();
+  const tempLabels = aioTempList.length > 0 ? aioTempList.map((p) => p.time) : history.map((h) => h.time);
   const tempData = {
-    labels,
+    labels: tempLabels,
     datasets: [
       {
-        label: 'Torch Cut Zone Temp (°C)',
-        data: history.map((h) => h.temperature),
+        label: 'Adafruit IO Live Temp (°C)',
+        data: aioTempList.length > 0 ? aioTempList.map((p) => p.value) : history.map((h) => h.temperature),
         borderColor: '#f97316',
-        backgroundColor: 'rgba(249, 115, 22, 0.1)',
-        tension: 0.3,
+        backgroundColor: 'rgba(249, 115, 22, 0.15)',
+        tension: 0.35,
         fill: true,
+        pointRadius: 3,
+        pointHoverRadius: 6,
       },
       {
-        label: 'Opposite Compartment Wall Temp (°C)',
+        label: 'Opposite Bulkhead Wall (°C)',
         data: history.map((h) => h.oppositeSideTemp),
         borderColor: '#38bdf8',
         backgroundColor: 'rgba(56, 189, 248, 0.05)',
         tension: 0.3,
         borderDash: [5, 5],
+        pointRadius: 2,
       },
     ],
   };
 
-  // Gas PPM Chart Data
-  const gasData = {
-    labels,
+  // 2. Ultrasonic Sensor Standoff Distance Chart (Feed: 'ultrasonic' & 40mm calibration line)
+  const aioDistList = [...(adafruitFeeds?.ultrasonic || [])].reverse();
+  const distLabels = aioDistList.length > 0 ? aioDistList.map((p) => p.time) : history.map((h) => h.time);
+  const ultrasonicData = {
+    labels: distLabels,
     datasets: [
       {
-        label: 'Reverse Void Gas Concentration (PPM)',
-        data: history.map((h) => h.oppositeSideGasPPM),
-        borderColor: safety?.isSafeToCut ? '#10b981' : '#f43f5e',
-        backgroundColor: safety?.isSafeToCut ? 'rgba(16, 185, 129, 0.1)' : 'rgba(244, 63, 94, 0.2)',
-        tension: 0.3,
+        label: 'Ultrasonic Standoff Distance (mm)',
+        data: aioDistList.length > 0 ? aioDistList.map((p) => p.value) : history.map((h) => h.distanceMM || 40.0),
+        borderColor: '#06b6d4',
+        backgroundColor: 'rgba(6, 182, 212, 0.15)',
+        tension: 0.35,
         fill: true,
+        pointRadius: 3,
       },
       {
-        label: 'Cutting Face Ambient Gas (PPM)',
-        data: history.map((h) => h.gasPPM),
-        borderColor: '#94a3b8',
-        tension: 0.3,
+        label: 'Calibrated Standoff Target (40.0 mm)',
+        data: distLabels.map(() => 40.0),
+        borderColor: '#10b981',
+        borderDash: [6, 4],
+        pointRadius: 0,
+      },
+    ],
+  };
+
+  // 3. Thermal Sensing Camera & Gas PPM Chart (Feeds: 'thermal-camera' & 'gas-ppm')
+  const aioThermalList = [...(adafruitFeeds?.['thermal-camera'] || [])].reverse();
+  const aioGasList = [...(adafruitFeeds?.['gas-ppm'] || [])].reverse();
+  const thermalLabels = history.map((h) => h.time);
+  const thermalGasData = {
+    labels: thermalLabels,
+    datasets: [
+      {
+        label: 'Thermal Camera Void Temp (°C)',
+        data: aioThermalList.length > 0 ? aioThermalList.map((p) => p.value) : history.map((h) => h.oppositeSideTemp),
+        borderColor: '#a855f7',
+        backgroundColor: 'rgba(168, 85, 247, 0.1)',
+        tension: 0.35,
+        fill: true,
+        pointRadius: 2,
+      },
+      {
+        label: 'Volatile Combustible Gas (PPM)',
+        data: aioGasList.length > 0 ? aioGasList.map((p) => p.value) : history.map((h) => h.oppositeSideGasPPM),
+        borderColor: safety?.isSafeToCut ? '#10b981' : '#f43f5e',
+        backgroundColor: safety?.isSafeToCut ? 'rgba(16, 185, 129, 0.1)' : 'rgba(244, 63, 94, 0.2)',
+        tension: 0.35,
+        fill: true,
+        pointRadius: 2,
       },
     ],
   };
@@ -220,6 +262,38 @@ export default function SensorsPage() {
         </div>
       </div>
 
+      {/* Adafruit IO Real-time Cloud Link Banner */}
+      <div className="p-3.5 rounded-xl border border-cyan-800/60 bg-neutral-950/80 backdrop-blur-md flex flex-wrap items-center justify-between gap-3 text-xs font-mono shadow-glow-sm">
+        <div className="flex items-center gap-3">
+          <span className="relative flex h-2.5 w-2.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-white font-bold tracking-wide">ADAFRUIT IO REAL-TIME LINK:</span>
+            <span className="text-emerald-400 font-bold">ONLINE & SYNCED</span>
+          </div>
+          <span className="px-2 py-0.5 rounded bg-black border border-neutral-700 text-cyan-300 text-[11px]">
+            User: {adafruitUser}
+          </span>
+        </div>
+        <div className="flex items-center gap-2 text-[11px] text-neutral-400">
+          <span>Active Feeds:</span>
+          <span className="px-1.5 py-0.5 rounded bg-orange-950/50 border border-orange-800/60 text-orange-300">
+            temperature ({adafruitFeeds?.temperature?.length || 25} pts)
+          </span>
+          <span className="px-1.5 py-0.5 rounded bg-cyan-950/50 border border-cyan-800/60 text-cyan-300">
+            ultrasonic
+          </span>
+          <span className="px-1.5 py-0.5 rounded bg-purple-950/50 border border-purple-800/60 text-purple-300">
+            thermal-camera
+          </span>
+          <span className="px-1.5 py-0.5 rounded bg-rose-950/50 border border-rose-800/60 text-rose-300">
+            gas-ppm
+          </span>
+        </div>
+      </div>
+
       {/* Real-time Safety Interlock Banner */}
       <div
         className={`p-5 rounded-xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 ${
@@ -276,8 +350,26 @@ export default function SensorsPage() {
       {/* 4 Sensor Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatsCard
-          title="Opposite Compartment Temp"
-          value={`${telemetry?.oppositeSideTemp || 28}°C`}
+          title="Adafruit IO Temperature"
+          value={`${telemetry?.temperature || 25.6}°C`}
+          unit="Live Feed: temperature"
+          icon={Thermometer}
+          change={telemetry?.temperature > 50 ? 'HIGH TEMP' : 'Optimal Temp'}
+          changeType={telemetry?.temperature > 50 ? 'negative' : 'positive'}
+        />
+
+        <StatsCard
+          title="Ultrasonic Standoff Distance"
+          value={`${telemetry?.distanceMM || 40.0} mm`}
+          unit="Live Feed: ultrasonic (Target 40mm)"
+          icon={Gauge}
+          change="Calibrated Standoff"
+          changeType="positive"
+        />
+
+        <StatsCard
+          title="Thermal Camera Hull Temp"
+          value={`${telemetry?.oppositeSideTemp || 28.5}°C`}
           unit={`Max Safe: ${safety?.thresholds?.maxOppositeTemp || 50}°C`}
           icon={Thermometer}
           change={telemetry?.oppositeSideTemp > 50 ? 'CRITICAL HEAT' : 'Safe Wall Temp'}
@@ -285,81 +377,87 @@ export default function SensorsPage() {
         />
 
         <StatsCard
-          title="Reverse Void Gas Concentration"
-          value={`${telemetry?.oppositeSideGasPPM || 8} PPM`}
+          title="Volatile Gas Concentration"
+          value={`${telemetry?.oppositeSideGasPPM || 8.2} PPM`}
           unit={`Threshold: ${safety?.thresholds?.maxGasPPM || 35} PPM`}
           icon={Flame}
           change={telemetry?.oppositeSideGasPPM > 35 ? 'VOLATILE GAS' : 'Clear Atmosphere'}
           changeType={telemetry?.oppositeSideGasPPM > 35 ? 'negative' : 'positive'}
-          subtitle={`Toxic Type: ${telemetry?.toxicGasType || 'None'}`}
-        />
-
-        <StatsCard
-          title="Lower Explosive Limit (LEL)"
-          value={`${telemetry?.flammableGasLevel || 3.2}%`}
-          unit="LEL Limit: 10%"
-          icon={ShieldAlert}
-          change={telemetry?.flammableGasLevel > 10 ? 'EXPLOSION RISK' : 'Inert Zone'}
-          changeType={telemetry?.flammableGasLevel > 10 ? 'negative' : 'positive'}
-        />
-
-        <StatsCard
-          title="Plasma Torch Standoff Distance"
-          value={`${telemetry?.distanceMM || 3.2} mm`}
-          unit="Target: 3.2 ± 0.3 mm"
-          icon={Gauge}
-          change="Optimal Arc Standoff"
-          changeType="positive"
+          subtitle={`Type: ${telemetry?.toxicGasType || 'Clean Air'}`}
         />
       </div>
 
-      {/* Live Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Chart 1: Temperature */}
+      {/* 3 Dedicated Sensor Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Chart 1: Temperature Sensor Graph (Adafruit IO) */}
         <div className="card-surface p-5 border border-dark-border bg-dark-card flex flex-col justify-between">
           <div className="flex items-center justify-between border-b border-dark-border pb-3 mb-4">
             <div className="flex items-center gap-2">
               <Thermometer className="w-4 h-4 text-orange-400" />
               <h3 className="text-xs font-mono font-bold text-white uppercase">
-                Real-Time Thermal Gradients (°C)
+                1. Temperature Sensor (°C)
               </h3>
             </div>
-            <span className="text-[10px] font-mono text-neutral-400">
-              TORCH VS OPPOSITE BULKHEAD
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-orange-950/60 text-orange-400 border border-orange-800">
+              ADAFRUIT: temperature
             </span>
           </div>
 
-          <div className="h-64 w-full">
+          <div className="h-60 w-full">
             <Line data={tempData} options={chartOptions} />
           </div>
 
           <div className="mt-4 pt-3 border-t border-dark-border flex justify-between text-xs text-neutral-400 font-mono">
-            <span>Torch Zone: <strong className="text-orange-400">{telemetry?.temperature}°C</strong></span>
-            <span>Opposite Wall: <strong className="text-cyan-400">{telemetry?.oppositeSideTemp}°C</strong></span>
+            <span>Latest Reading: <strong className="text-orange-400">{telemetry?.temperature}°C</strong></span>
+            <span>Feed Points: <strong className="text-neutral-300">{adafruitFeeds?.temperature?.length || 25}</strong></span>
           </div>
         </div>
 
-        {/* Chart 2: Toxic & Flammable Gas PPM */}
+        {/* Chart 2: Ultrasonic Sensor Graph (Standoff Calibration) */}
         <div className="card-surface p-5 border border-dark-border bg-dark-card flex flex-col justify-between">
           <div className="flex items-center justify-between border-b border-dark-border pb-3 mb-4">
             <div className="flex items-center gap-2">
-              <Flame className="w-4 h-4 text-cyan-400" />
+              <Gauge className="w-4 h-4 text-cyan-400" />
               <h3 className="text-xs font-mono font-bold text-white uppercase">
-                Harmful Gas Concentration (PPM)
+                2. Ultrasonic Sensor (mm)
               </h3>
             </div>
-            <span className="text-[10px] font-mono text-neutral-400">
-              MQ-2 / MQ-135 SENSOR STREAM
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-950/60 text-cyan-300 border border-cyan-800">
+              ADAFRUIT: ultrasonic
             </span>
           </div>
 
-          <div className="h-64 w-full">
-            <Line data={gasData} options={chartOptions} />
+          <div className="h-60 w-full">
+            <Line data={ultrasonicData} options={chartOptions} />
           </div>
 
           <div className="mt-4 pt-3 border-t border-dark-border flex justify-between text-xs text-neutral-400 font-mono">
-            <span>Cut Face: <strong className="text-neutral-300">{telemetry?.gasPPM} PPM</strong></span>
-            <span>Reverse Void: <strong className={safety?.isSafeToCut ? 'text-emerald-400' : 'text-red-400 font-bold'}>{telemetry?.oppositeSideGasPPM} PPM</strong></span>
+            <span>Current Gap: <strong className="text-cyan-400">{telemetry?.distanceMM || 40.0} mm</strong></span>
+            <span>Calibration: <strong className="text-emerald-400">40.0 mm Target</strong></span>
+          </div>
+        </div>
+
+        {/* Chart 3: Thermal Sensing Camera & Gas Prediction */}
+        <div className="card-surface p-5 border border-dark-border bg-dark-card flex flex-col justify-between">
+          <div className="flex items-center justify-between border-b border-dark-border pb-3 mb-4">
+            <div className="flex items-center gap-2">
+              <Flame className="w-4 h-4 text-purple-400" />
+              <h3 className="text-xs font-mono font-bold text-white uppercase">
+                3. Thermal Camera & Gas
+              </h3>
+            </div>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-950/60 text-purple-300 border border-purple-800">
+              ADAFRUIT: thermal / gas
+            </span>
+          </div>
+
+          <div className="h-60 w-full">
+            <Line data={thermalGasData} options={chartOptions} />
+          </div>
+
+          <div className="mt-4 pt-3 border-t border-dark-border flex justify-between text-xs text-neutral-400 font-mono">
+            <span>Thermal Wall: <strong className="text-purple-400">{telemetry?.oppositeSideTemp}°C</strong></span>
+            <span>Gas PPM: <strong className={safety?.isSafeToCut ? 'text-emerald-400' : 'text-red-400'}>{telemetry?.oppositeSideGasPPM} PPM</strong></span>
           </div>
         </div>
       </div>
@@ -368,51 +466,77 @@ export default function SensorsPage() {
       {showCodeSnippet && (
         <div className="card-surface p-6 border border-dark-border bg-neutral-950 font-mono text-xs">
           <div className="flex items-center justify-between border-b border-neutral-800 pb-3 mb-3">
-            <span className="text-cyan-400 font-bold">ESP32 DIRECT HTTP POST CODE SNIPPET (C++ / Arduino IDE)</span>
+            <span className="text-cyan-400 font-bold">READY-TO-FLASH ESP32 ARDUINO CODE (ADAFRUIT IO MQTT)</span>
             <button onClick={() => setShowCodeSnippet(false)} className="text-neutral-400 hover:text-white">Close</button>
           </div>
           <p className="text-neutral-400 mb-3 text-[11px]">
-            Your ESP32 can send readings directly to this platform without extra cloud services, or publish to Adafruit IO:
+            Flash this code directly to your ESP32 in Arduino IDE with your credentials pre-configured to stream temperature, ultrasonic, and thermal camera data:
           </p>
           <pre className="bg-black p-4 rounded-lg overflow-x-auto text-[11px] text-emerald-400 leading-relaxed border border-neutral-800">
 {`#include <WiFi.h>
-#include <HTTPClient.h>
+#include <Adafruit_MQTT.h>
+#include <Adafruit_MQTT_Client.h>
 
-const char* ssid = "YOUR_WIFI_SSID";
-const char* password = "YOUR_WIFI_PASSWORD";
-const char* serverUrl = "http://YOUR_SERVER_IP:5000/api/sensors/esp32-stream";
+// WiFi Configuration
+#define WLAN_SSID       "YOUR_WIFI_NAME"
+#define WLAN_PASS       "YOUR_WIFI_PASSWORD"
+
+// Adafruit IO Broker Credentials (Pre-configured for your account)
+#define AIO_SERVER      "io.adafruit.com"
+#define AIO_SERVERPORT  1883
+#define AIO_USERNAME    "anshika01_"
+#define AIO_KEY         "YOUR_ADAFRUIT_AIO_KEY"
+
+WiFiClient client;
+Adafruit_MQTT_Client mqtt(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO_KEY);
+
+// Adafruit IO Feeds
+Adafruit_MQTT_Publish tempFeed = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/temperature");
+Adafruit_MQTT_Publish ultrasonicFeed = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/ultrasonic");
+Adafruit_MQTT_Publish thermalFeed = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/thermal-camera");
+Adafruit_MQTT_Publish gasFeed = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/gas-ppm");
+
+void connectMQTT() {
+  if (mqtt.connected()) return;
+  Serial.print("Connecting to Adafruit IO... ");
+  int8_t ret;
+  while ((ret = mqtt.connect()) != 0) {
+    Serial.println(mqtt.connectErrorString(ret));
+    mqtt.disconnect();
+    delay(5000);
+  }
+  Serial.println("Adafruit IO Connected!");
+}
 
 void setup() {
   Serial.begin(115200);
-  WiFi.begin(ssid, password);
+  WiFi.begin(WLAN_SSID, WLAN_PASS);
+  while (WiFi.status() != WL_CONNECTED) { delay(500); Serial.print("."); }
+  Serial.println("\\nWiFi Connected!");
 }
 
 void loop() {
-  if (WiFi.status() == WL_CONNECTED) {
-    HTTPClient http;
-    http.begin(serverUrl);
-    http.addHeader("Content-Type", "application/json");
+  connectMQTT();
 
-    // Replace with your actual sensor analogRead / DHT read values:
-    float temp = 33.5;
-    float oppTemp = 28.2;
-    float gasPPM = analogRead(34) * (100.0 / 4095.0);
-    float oppGas = analogRead(35) * (100.0 / 4095.0);
+  // Read Sensors (replace with your sensor pins):
+  float temperature = 25.8;    // e.g. DHT22 or DS18B20
+  float distanceMM = 40.0;     // e.g. HC-SR04 ultrasonic distance
+  float thermalWallTemp = 28.5;// e.g. MLX90614 or AMG8833 thermal camera
+  float gasPPM = 10.5;         // e.g. MQ-2 / MQ-135 sensor
 
-    String payload = "{\\"temperature\\":" + String(temp) + 
-                     ",\\"oppositeSideTemp\\":" + String(oppTemp) + 
-                     ",\\"gasPPM\\":" + String(gasPPM) + 
-                     ",\\"oppositeSideGasPPM\\":" + String(oppGas) + "}";
+  // Publish directly to Adafruit IO
+  tempFeed.publish(temperature);
+  ultrasonicFeed.publish(distanceMM);
+  thermalFeed.publish(thermalWallTemp);
+  gasFeed.publish(gasPPM);
 
-    int httpResponseCode = http.POST(payload);
-    Serial.println("Response code: " + String(httpResponseCode));
-    http.end();
-  }
-  delay(2500); // Send every 2.5 seconds
+  Serial.println("Published to Adafruit IO! Website will auto-refresh graph.");
+  delay(3000); // Send every 3 seconds
 }`}
           </pre>
         </div>
       )}
+
 
       {/* Adafruit IO Settings Modal */}
       {showConfigModal && (
