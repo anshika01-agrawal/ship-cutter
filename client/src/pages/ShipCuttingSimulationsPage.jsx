@@ -199,7 +199,7 @@ export default function ShipCuttingSimulationsPage() {
           }`}
         >
           <Bot className="w-4 h-4" />
-          <span>3D Robot Arm Laser Cutter (TITAN-3D)</span>
+          <span>KRAN-VULCAN 3D (Ultrasonic Standoff & Cutting Robot)</span>
         </button>
 
         <button
@@ -369,35 +369,35 @@ export default function ShipCuttingSimulationsPage() {
             oppositeSideGasPPM={oppGas}
           />
 
-          {/* Explanation Callout for Robot Mechanics */}
+          {/* Detailed Features of KRAN-VULCAN & Ultrasonic Height Sensing */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="p-4 rounded-xl bg-neutral-900/80 border border-dark-border space-y-2">
               <div className="flex items-center gap-2 text-cyan-400 font-bold text-xs font-mono">
                 <Bot className="w-4 h-4" />
-                <span>Robotic Can Crawler Chassis</span>
+                <span>KRAN-VULCAN Magnetic Crawler Chassis</span>
               </div>
               <p className="text-xs text-neutral-400 leading-relaxed">
-                Magnetic crawler chassis attaches to vertical or inverted ship hulls with high-flux neodymium electro-magnets. Enables stable traversal over curved ship surfaces.
+                Rugged aluminum chassis with dual continuous rubber tracks and embedded Neodymium pot magnets. Adheres firmly to vertical and curved rusted ship hull plates. Features transparent heat-shielded electronics bay housing Raspberry Pi 5 &amp; ESP32.
               </p>
             </div>
 
             <div className="p-4 rounded-xl bg-neutral-900/80 border border-dark-border space-y-2">
-              <div className="flex items-center gap-2 text-orange-400 font-bold text-xs font-mono">
-                <Flame className="w-4 h-4" />
-                <span>6-Axis Arm & Laser Nozzle</span>
+              <div className="flex items-center gap-2 text-amber-400 font-bold text-xs font-mono">
+                <Radio className="w-4 h-4" />
+                <span>Ultrasonic Standoff &amp; Auto-Height (THC)</span>
               </div>
               <p className="text-xs text-neutral-400 leading-relaxed">
-                High-power fiber laser / plasma torch nozzle maintains a precise 3.2 mm standoff gap. Auto-ignites kerf cut only when the safety bridge reports green.
+                Ultrasonic transducer probe tracks nozzle-to-plate distance in real-time. Robot lowers and calibrates torch to the exact target standoff (e.g. 3.5 mm). Only after locking distance within tolerance does the plasma torch ignite and commence cutting!
               </p>
             </div>
 
             <div className="p-4 rounded-xl bg-neutral-900/80 border border-dark-border space-y-2">
               <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs font-mono">
                 <ShieldCheck className="w-4 h-4" />
-                <span>Opposite-Side Safety Interlock</span>
+                <span>Front Gas Pods &amp; Safety Interlock</span>
               </div>
               <p className="text-xs text-neutral-400 leading-relaxed">
-                If the opposite compartment has fuel gas or temp exceeding 50°C, the system issues <span className="text-red-400 font-mono">SIGNAL_INHIBITED_RED</span> and turns off the laser immediately.
+                Front bumper cluster with 3 gas sensors and OAK-D Lite stereo camera inspects ambient fumes. Linked with opposite bulkhead telemetry—if explosive fumes or temperature &gt; 50°C occur, cut is electronically inhibited immediately.
               </p>
             </div>
           </div>
