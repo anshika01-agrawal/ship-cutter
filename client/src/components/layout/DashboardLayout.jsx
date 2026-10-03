@@ -11,6 +11,12 @@ export default function DashboardLayout() {
     switch (pathname) {
       case '/dashboard':
         return 'Real-Time Cutting Telemetry';
+      case '/dashboard/sensors':
+        return 'ESP32 & Adafruit IO Live Sensor Stream';
+      case '/dashboard/simulation':
+        return 'Robot Cutting Simulation & Safety Signal Bridge';
+      case '/dashboard/database':
+        return 'Database Status & Collection Explorer';
       case '/dashboard/parts':
         return 'Part Tracking & Classification';
       case '/dashboard/materials':

@@ -15,6 +15,8 @@ import feasibilityRoutes from './routes/feasibility.js';
 import photoRoutes from './routes/photos.js';
 import blogRoutes from './routes/blog.js';
 import contactRoutes from './routes/contact.js';
+import sensorRoutes from './routes/sensors.js';
+import databaseRoutes from './routes/database.js';
 
 dotenv.config();
 
@@ -59,6 +61,8 @@ app.use('/api/feasibility', feasibilityRoutes);
 app.use('/api/photos', photoRoutes);
 app.use('/api/blog', blogRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/sensors', sensorRoutes);
+app.use('/api/database', databaseRoutes);
 
 // Root fallback
 app.get('/', (req, res) => {

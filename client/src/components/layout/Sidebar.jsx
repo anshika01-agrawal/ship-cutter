@@ -12,17 +12,21 @@ import {
   Bot,
   ArrowLeft,
   Activity,
-  ChevronRight,
-  ShieldAlert
+  Radio,
+  Zap,
+  Database
 } from 'lucide-react';
 
 export default function Sidebar({ isOpen, onClose }) {
   const navItems = [
     { label: 'Real-time Cutting', path: '/dashboard', icon: Flame, badge: 'Live' },
+    { label: 'ESP32 / Adafruit Sensors', path: '/dashboard/sensors', icon: Radio, badge: 'IoT' },
+    { label: 'Simulation & Safety Bridge', path: '/dashboard/simulation', icon: Zap, highlight: true },
     { label: 'Part Tracking', path: '/dashboard/parts', icon: Layers },
     { label: 'Material Analysis', path: '/dashboard/materials', icon: PieChart },
     { label: 'Robot Maintenance', path: '/dashboard/maintenance', icon: Wrench },
     { label: 'Feasibility & ROI', path: '/dashboard/feasibility', icon: TrendingUp },
+    { label: 'Database Explorer', path: '/dashboard/database', icon: Database },
     { label: 'Cut History', path: '/dashboard/history', icon: History },
     { label: 'Photo Manager', path: '/dashboard/photos', icon: Image },
     { label: 'Ship Fleet Manager', path: '/dashboard/ships', icon: Ship },

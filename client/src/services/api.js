@@ -58,4 +58,18 @@ export const api = {
 
   // Contact
   submitContact: (data) => fetchJson('/contact', { method: 'POST', body: JSON.stringify(data) }),
+
+  // Live ESP32 & Adafruit IO Sensors
+  getLiveSensors: () => fetchJson('/sensors/live'),
+  getAdafruitFeed: (feedKey, username, key) => {
+    const params = new URLSearchParams();
+    if (username) params.append('username', username);
+    if (key) params.append('key', key);
+    return fetchJson(`/sensors/adafruit/feed/${feedKey}?${params.toString()}`);
+  },
+  toggleHazardSimulation: () => fetchJson('/sensors/toggle-hazard', { method: 'POST' }),
+
+  // Database Inspector
+  getDatabaseStatus: () => fetchJson('/database/status'),
+  inspectDatabase: () => fetchJson('/database/inspect'),
 };
