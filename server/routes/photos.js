@@ -8,47 +8,74 @@ const router = express.Router();
 const defaultPhotos = [
   {
     _id: 'ph-1',
-    title: 'Plasma Cut on Main Hull Plate',
-    url: '/uploads/plasma_cut_hull.jpg',
-    category: 'cutting',
-    tags: ['plasma', 'hull', 'standoff', 'hypertherm'],
-    description: 'Autonomous crawler torch traversing 28mm IS 2062 steel plate with Initial Height Sensing',
+    title: 'Magnetic Crawler Vertical Hull Plasma Arc',
+    url: '/uploads/crawler_hull_cut.jpg',
+    category: 'robot',
+    tags: ['crawler', 'plasma', 'drydock', 'adhesion'],
+    description: 'Autonomous crawler tractor scaling vertical ship hull plate with 400A plasma torch arc',
     createdAt: new Date().toISOString()
   },
   {
     _id: 'ph-2',
-    title: 'Manual Hull Dismantling (Legacy Danger Zone)',
-    url: '/uploads/manual_hull_cutting_torch.jpg',
-    category: 'before_after',
-    tags: ['stern', 'dismantling', 'alang'],
-    description: 'Extracted stern section with hazardous manual torch operation - now replaced by robotics',
+    title: 'LiDAR Drone Cargo Hold 3D Structural Scan',
+    url: '/uploads/drone_ship_scan.jpg',
+    category: 'robot',
+    tags: ['drone', 'lidar', 'cargo-hold', '3d-mapping'],
+    description: 'Aerial inspection drone mapping hull bulkheads with high-density laser scan grid',
     createdAt: new Date().toISOString()
   },
   {
     _id: 'ph-3',
-    title: 'Ladder-Based Manual Hull Torch Cutting',
-    url: '/uploads/manual_hull_cutting_ladder.jpg',
-    category: 'before_after',
-    tags: ['beam', 'structural', 'steel', 'manual'],
-    description: 'Dangerous manual scaffolding operation eliminated by autonomous magnetic crawler robotics',
+    title: 'Quadruped Engine Room Hazard Patrol Robot',
+    url: '/uploads/quadruped_ship_robot.jpg',
+    category: 'robot',
+    tags: ['quadruped', 'thermal', 'engine-room', 'safety'],
+    description: 'Robotic inspection dog traversing narrow gangways with thermal imaging and gas sniffing probes',
     createdAt: new Date().toISOString()
   },
   {
     _id: 'ph-4',
-    title: 'KRAN-VULCAN Robotic Crawler',
-    url: '/uploads/kran_vulcan_crawler.jpg',
-    category: 'robot',
-    tags: ['robot', 'kran-vulcan', 'neodymium', 'sensors'],
-    description: 'Continuous magnetic track deployment on vertical ship hull with Raspberry Pi & ESP32 bay',
+    title: 'High-Power Hydraulic Demolition Shear Robot',
+    url: '/uploads/heavy_robotic_shear.jpg',
+    category: 'machine',
+    tags: ['shear', 'hydraulic', 'bulkhead', 'demolition'],
+    description: 'Heavy demolition robotic arm slicing naval armor steel girders with 600-ton hydraulic bite force',
     createdAt: new Date().toISOString()
   },
   {
     _id: 'ph-5',
-    title: 'Articulated Arm with Thermal Cutting Torch',
+    title: 'Automated CNC Gantry Multi-Torch Deck Cutter',
+    url: '/uploads/gantry_plasma_cutter.jpg',
+    category: 'machine',
+    tags: ['cnc', 'gantry', 'deck-plate', 'mist-suppression'],
+    description: 'Multi-axis CNC plasma gantry profiling thick marine deck plating with water-mist cooling',
+    createdAt: new Date().toISOString()
+  },
+  {
+    _id: 'ph-6',
+    title: '6-Axis Articulated Arm with Thermal Standoff Torch',
     url: '/uploads/robot_arm_torch.jpg',
+    category: 'machine',
+    tags: ['torch', 'articulated', 'arm', 'ultrasonic'],
+    description: 'Multi-joint robotic arm performing automated bevel cuts with ultrasonic standoff control',
+    createdAt: new Date().toISOString()
+  },
+  {
+    _id: 'ph-7',
+    title: 'KRAN-VULCAN Neodymium Magnetic Chassis',
+    url: '/uploads/kran_vulcan_crawler.jpg',
+    category: 'robot',
+    tags: ['robot', 'kran-vulcan', 'neodymium', 'tracks'],
+    description: 'High-traction continuous rubber tracks with embedded neodymium magnets for vertical grip',
+    createdAt: new Date().toISOString()
+  },
+  {
+    _id: 'ph-8',
+    title: 'High-Precision Automated Plasma Kerf Standoff Head',
+    url: '/uploads/plasma_cut_hull.jpg',
     category: 'cutting',
-    tags: ['torch', 'articulated', 'arm', 'plasma'],
-    description: 'Multi-joint industrial robotic arm cutting steel hull plate with ultrasonic standoff probe',
+    tags: ['plasma', 'kerf', 'standoff', 'sensor'],
+    description: 'Initial height sensing and closed-loop arc voltage torch control traversing marine hull plate',
     createdAt: new Date().toISOString()
   }
 ];

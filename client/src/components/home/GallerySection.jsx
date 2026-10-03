@@ -1,121 +1,155 @@
 import React, { useState, useEffect } from 'react';
-import { Maximize2, X, Filter, ArrowRight, ShieldCheck, Tag, Plus, UploadCloud } from 'lucide-react';
+import { Maximize2, X, Filter, ArrowRight, ShieldCheck, Tag, Plus, UploadCloud, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AnimatedSection from '../common/AnimatedSection';
 import ImageUpload from '../common/ImageUpload';
 import { api } from '../../services/api';
 
-const DEFAULT_GALLERY = [
+const BASE_GALLERY = [
   {
     id: 'base-1',
-    title: 'KRAN-VULCAN Magnetic Vertical Grip',
+    title: 'Magnetic Crawler Vertical Hull Plasma Arc',
     category: 'robot',
     categoryLabel: 'Crawler Robotics',
-    img: '/images/kran_vulcan_crawler.jpg',
-    specs: '850kg Traction • Neodymium Continuous Tracks',
-    location: 'Alang Shipyard Berth 12',
+    img: '/images/crawler_hull_cut.jpg',
+    specs: '850kg Traction • 400A Hypertherm Plasma • Vertical Drydock Cut',
+    location: 'Alang Dry Dock Berth 12',
   },
   {
     id: 'base-2',
-    title: 'Articulated Arm with Thermal Cutting Torch',
-    category: 'plasma',
-    categoryLabel: 'Plasma Machinery',
+    title: 'LiDAR Drone Cargo Hold 3D Spatial Scan',
+    category: 'drone',
+    categoryLabel: 'Aerial LiDAR Robotics',
+    img: '/images/drone_ship_scan.jpg',
+    specs: 'Dense Laser Grid • Millimeter Hull Geometry Mapping',
+    location: 'Bulk Carrier Hold #3',
+  },
+  {
+    id: 'base-3',
+    title: 'Quadruped Engine Room Hazard Patrol Robot',
+    category: 'robot',
+    categoryLabel: 'Quadruped Robotics',
+    img: '/images/quadruped_ship_robot.jpg',
+    specs: 'FLIR Thermal Camera • Combustible Gas Sniffer • 360° LiDAR',
+    location: 'Engine Room Gangway 3A',
+  },
+  {
+    id: 'base-4',
+    title: 'High-Power Hydraulic Demolition Shear Robot',
+    category: 'machine',
+    categoryLabel: 'Hydraulic Demolition',
+    img: '/images/heavy_robotic_shear.jpg',
+    specs: '600-Ton Hydraulic Bite • Naval Armor Steel Dismantling',
+    location: 'Scrap Processing Yard Alpha',
+  },
+  {
+    id: 'base-5',
+    title: 'Automated CNC Gantry Multi-Torch Deck Cutter',
+    category: 'machine',
+    categoryLabel: 'CNC Plasma Machinery',
+    img: '/images/gantry_plasma_cutter.jpg',
+    specs: 'Multi-Torch Gantry • Water-Mist Cooling • Heavy Plate Contouring',
+    location: 'Fabrication & Slicing Bay 2',
+  },
+  {
+    id: 'base-6',
+    title: '6-Axis Articulated Arm with Thermal Standoff Torch',
+    category: 'machine',
+    categoryLabel: 'Articulated Robotics',
     img: '/images/robot_arm_torch.jpg',
     specs: 'Continuous Ultrasonic Standoff • Frame Warpage < 1.5mm',
     location: 'Mobile Deployment Unit Alpha',
   },
   {
-    id: 'base-3',
-    title: 'Transverse Bulkhead Plasma Cut',
-    category: 'plasma',
+    id: 'base-7',
+    title: 'KRAN-VULCAN Neodymium Magnetic Chassis',
+    category: 'robot',
+    categoryLabel: 'Crawler Blueprint',
+    img: '/images/kran_vulcan_crawler.jpg',
+    specs: 'Raspberry Pi 5 + ESP32 Telemetry • OAK-D Lite Vision',
+    location: 'Autonomous Systems Lab',
+  },
+  {
+    id: 'base-8',
+    title: 'High-Precision Automated Plasma Kerf Standoff Head',
+    category: 'machine',
     categoryLabel: 'Plasma Machinery',
     img: '/images/plasma_cut_hull.jpg',
-    specs: '32mm AH36 Plate • 142 cm/min • Clean Kerf',
-    location: 'Alang Dry Dock 4B',
-  },
-  {
-    id: 'base-4',
-    title: 'Manual Scaffolding Torch Cutting (Legacy Hazard)',
-    category: 'before_after',
-    categoryLabel: 'Manual vs Robotic',
-    img: '/images/manual_hull_cutting_torch.jpg',
-    specs: 'Extreme Fire & Structural Collapse Risk • Replaced by KRAN-VULCAN',
-    location: 'Legacy Ship Breaking Berth',
-  },
-  {
-    id: 'base-5',
-    title: 'Manual Ladder Cutting on Hull Plate (High Spark Hazard)',
-    category: 'before_after',
-    categoryLabel: 'Manual vs Robotic',
-    img: '/images/manual_hull_cutting_ladder.jpg',
-    specs: 'Hazardous Manual Entry • Heavy Spark Shower • Eliminated by AI',
-    location: 'Legacy Alang Plot 44',
+    specs: '32mm AH36 Steel • 142 cm/min Cutting Speed • Clean Kerf',
+    location: 'Dry Dock Berth 4B',
   },
 ];
 
 export default function GallerySection() {
   const [filter, setFilter] = useState('all');
   const [activePhoto, setActivePhoto] = useState(null);
-  const [uploadedPhotos, setUploadedPhotos] = useState([]);
+  const [userUploadedPhotos, setUserUploadedPhotos] = useState([]);
   const [showUploadModal, setShowUploadModal] = useState(false);
 
   useEffect(() => {
-    async function loadUploaded() {
+    async function loadUserUploads() {
       try {
         const photos = await api.getPhotos();
         if (Array.isArray(photos)) {
-          const formatted = photos.map((p) => {
-            const rawUrl = p.url || '';
-            const resolvedImg = rawUrl.startsWith('/uploads')
-              ? rawUrl.replace('/uploads', '/images')
-              : rawUrl || '/images/kran_vulcan_crawler.jpg';
+          // Identify base image filenames to never duplicate them
+          const baseFileNames = BASE_GALLERY.map((b) => b.img.split('/').pop());
 
-            let cat = p.category || 'robot';
-            let catLabel = 'Crawler Robotics';
-            if (cat === 'machine' || cat === 'cutting') {
-              cat = 'plasma';
-              catLabel = 'Plasma Machinery';
-            } else if (cat === 'before_after') {
-              catLabel = 'Before & After';
-            } else if (cat === 'parts') {
-              catLabel = 'Harvested Parts';
-            }
+          const customOnly = photos
+            .filter((p) => {
+              const fileName = (p.url || '').split('/').pop();
+              return fileName && !baseFileNames.includes(fileName);
+            })
+            .map((p) => {
+              const rawUrl = p.url || '';
+              const resolvedImg = rawUrl.startsWith('/uploads')
+                ? rawUrl.replace('/uploads', '/images')
+                : rawUrl || '/images/crawler_hull_cut.jpg';
 
-            return {
-              id: p._id || p.id || String(Math.random()),
-              title: p.title || 'Field Asset',
-              category: cat,
-              categoryLabel: catLabel,
-              img: resolvedImg,
-              specs: p.description || 'Uploaded Robotics & Machinery Asset',
-              location: p.tags?.length ? p.tags.join(' • ') : 'Verified Field Asset',
-              isUserUpload: true,
-            };
-          });
-          setUploadedPhotos(formatted);
+              let cat = p.category || 'robot';
+              let catLabel = 'Robotic System';
+              if (cat === 'machine' || cat === 'cutting') {
+                cat = 'machine';
+                catLabel = 'Machinery & Cutting';
+              } else if (cat === 'drone') {
+                cat = 'drone';
+                catLabel = 'Aerial Drone';
+              }
+
+              return {
+                id: p._id || p.id || String(Math.random()),
+                title: p.title || 'Field Robotics Asset',
+                category: cat,
+                categoryLabel: catLabel,
+                img: resolvedImg,
+                specs: p.description || 'Verified Field Asset',
+                location: p.tags?.length ? p.tags.join(' • ') : 'User Uploaded Asset',
+                isUserUpload: true,
+              };
+            });
+
+          setUserUploadedPhotos(customOnly);
         }
       } catch (err) {
-        console.error('Failed to load gallery photos:', err);
+        console.error('Failed to load user gallery photos:', err);
       }
     }
-    loadUploaded();
+    loadUserUploads();
   }, []);
 
   const handlePhotoUploaded = (newPhoto) => {
     const rawUrl = newPhoto.url || '';
     const resolvedImg = rawUrl.startsWith('/uploads')
       ? rawUrl.replace('/uploads', '/images')
-      : rawUrl || '/images/kran_vulcan_crawler.jpg';
+      : rawUrl || '/images/crawler_hull_cut.jpg';
 
     let cat = newPhoto.category || 'robot';
-    let catLabel = 'Crawler Robotics';
+    let catLabel = 'Robotic System';
     if (cat === 'machine' || cat === 'cutting') {
-      cat = 'plasma';
-      catLabel = 'Plasma Machinery';
-    } else if (cat === 'before_after') {
-      catLabel = 'Before & After';
-    } else if (cat === 'parts') {
-      catLabel = 'Harvested Parts';
+      cat = 'machine';
+      catLabel = 'Machinery & Cutting';
+    } else if (cat === 'drone') {
+      cat = 'drone';
+      catLabel = 'Aerial Drone';
     }
 
     const newItem = {
@@ -129,19 +163,19 @@ export default function GallerySection() {
       isUserUpload: true,
     };
 
-    setUploadedPhotos((prev) => [newItem, ...prev]);
+    setUserUploadedPhotos((prev) => [newItem, ...prev]);
     setShowUploadModal(false);
     setActivePhoto(newItem);
   };
 
-  const allItems = [...uploadedPhotos, ...DEFAULT_GALLERY];
+  // Combine unique user uploaded photos at top + base distinct gallery items
+  const allItems = [...userUploadedPhotos, ...BASE_GALLERY];
 
   const categories = [
     { id: 'all', label: 'All Operations' },
-    { id: 'robot', label: 'Crawler Robotics' },
-    { id: 'plasma', label: 'Plasma Machinery' },
-    { id: 'before_after', label: 'Manual vs Robotic' },
-    { id: 'parts', label: 'Harvested Parts' },
+    { id: 'robot', label: 'Crawler & Quadruped Robots' },
+    { id: 'drone', label: 'Aerial LiDAR Drones' },
+    { id: 'machine', label: 'Plasma & Demolition Machinery' },
   ];
 
   const filteredItems = allItems.filter((item) => {
@@ -158,14 +192,14 @@ export default function GallerySection() {
             <div className="flex items-center gap-2">
               <span className="text-xs font-mono uppercase tracking-widest text-accent-cyan">Visual Evidence</span>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-neutral-900 border border-neutral-700 text-neutral-300">
-                {allItems.length} Photos
+                {allItems.length} Unique Photos
               </span>
             </div>
             <h2 className="text-3xl sm:text-5xl font-extrabold text-white mt-2">
               Operational Field Gallery
             </h2>
             <p className="text-sm text-text-secondary mt-2 max-w-2xl">
-              High-resolution imagery of robotic crawlers, plasma thermal cutters, and hull dismantling operations. You can also upload new photos of robots and machines below.
+              Authentic high-resolution imagery of magnetic hull crawlers, aerial LiDAR scanning drones, quadruped inspection robots, hydraulic demolition shears, and CNC plasma systems.
             </p>
           </div>
 
@@ -219,9 +253,9 @@ export default function GallerySection() {
                   alt={item.title}
                   onError={(e) => {
                     e.currentTarget.onerror = null;
-                    e.currentTarget.src = '/images/kran_vulcan_crawler.jpg';
+                    e.currentTarget.src = '/images/crawler_hull_cut.jpg';
                   }}
-                  className="w-full h-full object-cover filter grayscale contrast-110 group-hover:grayscale-0 group-hover:scale-105 transition-all duration-500"
+                  className="w-full h-full object-cover filter contrast-105 group-hover:scale-105 transition-all duration-500"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-80 group-hover:opacity-60 transition-opacity" />
 
@@ -317,7 +351,7 @@ export default function GallerySection() {
                   alt={activePhoto.title}
                   onError={(e) => {
                     e.currentTarget.onerror = null;
-                    e.currentTarget.src = '/images/kran_vulcan_crawler.jpg';
+                    e.currentTarget.src = '/images/crawler_hull_cut.jpg';
                   }}
                   className="max-h-[65vh] w-auto object-contain"
                 />
