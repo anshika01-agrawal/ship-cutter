@@ -255,7 +255,7 @@ export default function GallerySection() {
                     e.currentTarget.onerror = null;
                     e.currentTarget.src = '/images/crawler_hull_cut.jpg';
                   }}
-                  className="w-full h-full object-cover filter contrast-105 group-hover:scale-105 transition-all duration-500"
+                  className="w-full h-full object-cover filter grayscale contrast-110 group-hover:grayscale-0 group-hover:scale-105 transition-all duration-500"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-80 group-hover:opacity-60 transition-opacity" />
 
