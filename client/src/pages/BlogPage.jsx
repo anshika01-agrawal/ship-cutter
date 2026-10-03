@@ -94,6 +94,10 @@ export default function BlogPage() {
                   <img
                     src={post.coverImage}
                     alt={post.title}
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = '/images/kran_vulcan_crawler.jpg';
+                    }}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 filter grayscale contrast-110 group-hover:grayscale-0"
                   />
                 </div>

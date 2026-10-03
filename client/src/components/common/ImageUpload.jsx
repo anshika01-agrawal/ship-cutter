@@ -132,11 +132,12 @@ export default function ImageUpload({ onUploaded, defaultCategory = 'cutting' })
               onChange={(e) => setCategory(e.target.value)}
               className="w-full bg-neutral-900 border border-dark-border rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-neutral-400"
             >
-              <option value="cutting">Cutting In-Progress</option>
-              <option value="parts">Extracted Parts</option>
-              <option value="material">Material / Scrap</option>
-              <option value="before_after">Before & After</option>
-              <option value="robot">Robot Inspection</option>
+              <option value="robot">🤖 Robotic Crawler & Autonomous Units</option>
+              <option value="machine">⚙️ Industrial Machinery & Plasma Cutters</option>
+              <option value="cutting">🔥 Cutting In-Progress</option>
+              <option value="parts">🧩 Extracted Structural Parts</option>
+              <option value="material">♻️ Recycled Material / Scrap</option>
+              <option value="before_after">⚖️ Before & After Dismantling</option>
             </select>
           </div>
         </div>

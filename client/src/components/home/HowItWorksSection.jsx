@@ -54,7 +54,7 @@ export default function HowItWorksSection() {
       icon: Cpu,
       headline: 'Predictive Neural Stress-Relief Path Optimization',
       desc: 'Our proprietary finite-element planning software models the residual tension in the ship frame. It calculates the exact cut sequence to prevent sudden structural warping, blade pinching, or accidental premature collapse of heavy crane-supported panels.',
-      image: 'https://images.unsplash.com/photo-1504917599217-d4dc5ebe6122?auto=format&fit=crop&w=1200&q=80',
+      image: '/images/robot_arm_torch.jpg',
       specs: [
         { label: 'Kerf Loss Target', value: '< 2.2% steel reduction' },
         { label: 'Thermal Distortion Prevention', value: 'Multi-pass cooling delay' },
@@ -69,7 +69,7 @@ export default function HowItWorksSection() {
       icon: Flame,
       headline: '400A High-Definition Plasma Thermal Arc Traversal',
       desc: 'Heavy-duty magnetic crawler tractors latch onto vertical and inverted steel hulls with 850kg adhesion force. The water-mist shrouded torch penetrates up to 80mm marine steel, cutting at 142 cm/min while vacuum hoods collect 99% of molten slag and toxic paint particulates.',
-      image: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=1200&q=80',
+      image: '/images/kran_vulcan_crawler.jpg',
       specs: [
         { label: 'Torch Arc Amperage', value: '400A Hypertherm Plasma' },
         { label: 'Cutting Speed', value: '120 - 180 cm / minute' },
@@ -84,7 +84,7 @@ export default function HowItWorksSection() {
       icon: Layers,
       headline: 'Automated Classification & High-Purity Smelter Yield',
       desc: 'As hull plates and deck beams are cleanly separated, integrated optical emission spectrometers analyze chemical composition. Secondary structural steel is segregated from copper, bronze, and aluminum components, generating certified quality certificates for electric arc furnace recycling.',
-      image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=1200&q=80',
+      image: '/images/plasma_cut_hull.jpg',
       specs: [
         { label: 'Secondary Recovery Rate', value: '94.8% net clean scrap' },
         { label: 'Alloy Verification', value: 'OES real-time elemental scan' },
@@ -212,7 +212,8 @@ export default function HowItWorksSection() {
                   alt={current.title}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 filter contrast-110"
                   onError={(e) => {
-                    e.currentTarget.src = 'https://images.unsplash.com/photo-1504917599217-d4dc5ebe6122?auto=format&fit=crop&w=1200&q=80';
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = '/images/kran_vulcan_crawler.jpg';
                   }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-85" />

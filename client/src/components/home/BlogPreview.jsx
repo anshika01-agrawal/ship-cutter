@@ -60,6 +60,10 @@ export default function BlogPreview() {
                   <img
                     src={post.coverImage}
                     alt={post.title}
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = '/images/kran_vulcan_crawler.jpg';
+                    }}
                     className="w-full h-full object-cover filter grayscale contrast-110 group-hover:grayscale-0 group-hover:scale-105 transition-all duration-500"
                   />
                 </div>

@@ -17,20 +17,20 @@ const defaultPhotos = [
   },
   {
     _id: 'ph-2',
-    title: 'Dismantled Stern Section',
-    url: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=800&q=80',
+    title: 'Manual Hull Dismantling (Legacy Danger Zone)',
+    url: '/uploads/manual_hull_cutting_torch.jpg',
     category: 'before_after',
     tags: ['stern', 'dismantling', 'alang'],
-    description: 'Extracted stern section staged for scrap recycling at Alang Yard',
+    description: 'Extracted stern section with hazardous manual torch operation - now replaced by robotics',
     createdAt: new Date().toISOString()
   },
   {
     _id: 'ph-3',
-    title: 'High Tensile Beam Cross-Section',
-    url: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80',
-    category: 'parts',
-    tags: ['beam', 'structural', 'steel', 'is2062'],
-    description: 'Clean kerf cut with zero thermal distortion on IS 2062 girder',
+    title: 'Ladder-Based Manual Hull Torch Cutting',
+    url: '/uploads/manual_hull_cutting_ladder.jpg',
+    category: 'before_after',
+    tags: ['beam', 'structural', 'steel', 'manual'],
+    description: 'Dangerous manual scaffolding operation eliminated by autonomous magnetic crawler robotics',
     createdAt: new Date().toISOString()
   },
   {

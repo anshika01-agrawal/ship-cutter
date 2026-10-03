@@ -35,11 +35,12 @@ export default function PhotosPage() {
 
   const categories = [
     { id: 'all', label: 'All Photos' },
+    { id: 'robot', label: 'Robotic Crawler' },
+    { id: 'machine', label: 'Machinery & Cutters' },
     { id: 'cutting', label: 'Cutting In-Progress' },
     { id: 'parts', label: 'Structural Parts' },
     { id: 'material', label: 'Material Scrap' },
     { id: 'before_after', label: 'Before & After' },
-    { id: 'robot', label: 'Robotic Crawler' },
   ];
 
   return (
@@ -61,7 +62,7 @@ export default function PhotosPage() {
           className="btn-primary text-xs flex items-center gap-1.5 self-start"
         >
           <Plus className="w-4 h-4 text-black" />
-          <span>{showUploadForm ? 'Close Uploader' : 'Upload Field Image'}</span>
+          <span>{showUploadForm ? 'Close Uploader' : 'Upload Machine / Robot Photo'}</span>
         </button>
       </div>
 
