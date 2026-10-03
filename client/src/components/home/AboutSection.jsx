@@ -6,9 +6,9 @@ export default function AboutSection() {
   const team = [
     {
       name: 'Anurag Tiwari',
-      role: 'Robotics Hardware & Kinematics',
+      role: 'Embedded Systems & IoT',
       photo: '/images/anurag_tiwari.jpg',
-      bio: 'Hardware design, crawler chassis mechanics, and robotic arm assembly.',
+      bio: 'ESP32 microcontroller interfacing, gas sensing logic, and IoT telemetry.',
     },
     {
       name: 'Anshika Agrawal',
@@ -24,9 +24,9 @@ export default function AboutSection() {
     },
     {
       name: 'Priyanshu Arya',
-      role: 'Embedded Systems & IoT',
+      role: 'Robotics Hardware & Kinematics',
       photo: '/images/priyanshu_arya.jpg',
-      bio: 'ESP32 microcontroller interfacing, gas sensing logic, and IoT telemetry.',
+      bio: 'Hardware design, crawler chassis mechanics, and robotic arm assembly.',
     },
   ];
 
