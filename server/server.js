@@ -80,6 +80,10 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: err.message || 'Internal Server Error' });
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Ship Cutting Backend Server running on http://localhost:${PORT}`);
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`🚀 Ship Cutting Backend Server running on http://localhost:${PORT}`);
+  });
+}
+
+export default app;
