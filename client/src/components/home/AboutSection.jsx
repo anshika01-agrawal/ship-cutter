@@ -6,31 +6,27 @@ export default function AboutSection() {
   const team = [
     {
       name: 'Anurag Tiwari',
-      role: 'Chief Robotics Architect & Hardware Lead',
-      credentials: 'Robotics & Autonomous Systems Specialist',
+      role: 'Robotics Hardware & Kinematics',
       photo: '/images/anurag_tiwari.jpg',
-      bio: 'Pioneered 6-axis magnetic crawler kinematics, KRAN-VULCAN hardware architecture, and high-temp plasma torch dampening for vertical marine plating.',
+      bio: 'Hardware design, crawler chassis mechanics, and robotic arm assembly.',
     },
     {
       name: 'Anshika Agrawal',
-      role: 'Lead Systems Architect & Project Director',
-      credentials: 'Autonomous Systems & Metallurgy Tech Lead',
+      role: 'Full Stack & IoT Systems',
       photo: '/images/anshika_agrawal.jpg',
-      bio: 'Directs software-hardware telemetry integration, closed-loop safety interlocks, and circular scrap valuation pipelines for sustainable ship dismantling.',
+      bio: 'Web platform architecture, live telemetry dashboard, and sensor integration.',
     },
     {
       name: 'Daksh Jain',
-      role: 'Head of Shipyard IoT & Sensor Integration',
-      credentials: 'Embedded Systems & IoT Telemetry Specialist',
+      role: 'Embedded Systems & Sensors',
       photo: '/images/daksh_jain.jpg',
-      bio: 'Engineers ultrasonic torch height control (THC), ESP32 sensor mesh networks, and real-time explosive gas hazard detection algorithms.',
+      bio: 'ESP32 interfacing, ultrasonic distance calibration, and gas sensing logic.',
     },
     {
       name: 'Priyanshu Arya',
-      role: 'Lead AI Perception & Path Planning',
-      credentials: 'Computer Vision & Neural Kinematics Specialist',
+      role: 'AI Vision & 3D Simulation',
       photo: '/images/priyanshu_arya.jpg',
-      bio: 'Designs FLIR thermal imaging gas plume prediction models, OAK-D Lite stereo vision tracking, and automated robotic seam cut trajectories.',
+      bio: 'Thermal camera gas detection, 3D cutting simulation, and seam tracking.',
     },
   ];
 
@@ -143,9 +139,9 @@ export default function AboutSection() {
         <div className="border-t border-dark-border pt-16">
           <div className="text-center max-w-2xl mx-auto mb-12">
             <span className="text-xs font-mono uppercase tracking-widest text-accent-cyan">Team</span>
-            <h3 className="text-2xl sm:text-3xl font-bold text-white mt-1">World-Class Robotics & Marine Experts</h3>
+            <h3 className="text-3xl sm:text-5xl font-extrabold text-white mt-1">RoboFest 6.0</h3>
             <p className="text-xs text-text-secondary mt-2">
-              Combining decades of deepwater salvage mastery with breakthrough AI perception.
+              Student innovators & developers presenting autonomous ship-dismantling robotics.
             </p>
           </div>
 
@@ -174,8 +170,7 @@ export default function AboutSection() {
                         {member.name}
                       </h4>
                       <div className="text-xs font-mono text-cyan-400 mt-1 font-semibold">{member.role}</div>
-                      <div className="text-[10px] text-neutral-400 font-mono mt-1">{member.credentials}</div>
-                      <p className="text-xs text-text-secondary mt-3 leading-relaxed">
+                      <p className="text-xs text-text-secondary mt-2.5 leading-relaxed">
                         {member.bio}
                       </p>
                     </div>
