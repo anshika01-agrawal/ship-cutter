@@ -12,21 +12,21 @@ export default function AboutSection() {
     },
     {
       name: 'Anshika Agrawal',
-      role: 'Full Stack & IoT Systems',
+      role: 'Full Stack & AI Vision',
       photo: '/images/anshika_agrawal.jpg',
-      bio: 'Web platform architecture, live telemetry dashboard, and sensor integration.',
+      bio: 'Web platform architecture, live dashboard, and AI vision cut tracking.',
     },
     {
       name: 'Daksh Jain',
-      role: 'Embedded Systems & Sensors',
+      role: '3D Simulation & Sensors',
       photo: '/images/daksh_jain.jpg',
-      bio: 'ESP32 interfacing, ultrasonic distance calibration, and gas sensing logic.',
+      bio: '3D robotic arm simulation, ultrasonic standoff, and distance calibration.',
     },
     {
       name: 'Priyanshu Arya',
-      role: 'AI Vision & 3D Simulation',
+      role: 'Embedded Systems & IoT',
       photo: '/images/priyanshu_arya.jpg',
-      bio: 'Thermal camera gas detection, 3D cutting simulation, and seam tracking.',
+      bio: 'ESP32 microcontroller interfacing, gas sensing logic, and IoT telemetry.',
     },
   ];
 
