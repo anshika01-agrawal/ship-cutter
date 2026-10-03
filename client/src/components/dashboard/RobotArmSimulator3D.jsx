@@ -175,25 +175,70 @@ export default function RobotArmSimulator3D({
       scene.add(rib);
     }
 
-    // Welded cut seam guide line on plate
-    const seamGeo = new THREE.PlaneGeometry(0.04, plateDepth - 1.5);
-    const seamMat = new THREE.MeshBasicMaterial({ color: 0x475569 });
+    // -------------------------------------------------------------
+    // CUT MARKS & SEAMS SYSTEM (Active Cut Marks + Completed Cuts)
+    // -------------------------------------------------------------
+    // 1. Completed Transverse Cut #1 (Severed slot across plate at z = -1.6)
+    const compCutGeo = new THREE.PlaneGeometry(5.4, 0.09);
+    const compCutMat = new THREE.MeshBasicMaterial({ color: 0x050608 }); // deep through-cut gap
+    const compCutLine = new THREE.Mesh(compCutGeo, compCutMat);
+    compCutLine.rotation.x = -Math.PI / 2;
+    compCutLine.position.set(0, 0.007, -1.6);
+    scene.add(compCutLine);
+
+    // Heat-affected zone border on completed cut
+    const compHazGeo = new THREE.PlaneGeometry(5.4, 0.26);
+    const compHazMat = new THREE.MeshBasicMaterial({ color: 0x1e293b, transparent: true, opacity: 0.8 });
+    const compHaz = new THREE.Mesh(compHazGeo, compHazMat);
+    compHaz.rotation.x = -Math.PI / 2;
+    compHaz.position.set(0, 0.005, -1.6);
+    scene.add(compHaz);
+
+    // 2. Active Longitudinal Seam Guide Line (Target trajectory to cut)
+    const seamGeo = new THREE.PlaneGeometry(0.03, 4.6);
+    const seamMat = new THREE.MeshBasicMaterial({ color: 0x334155 });
     const seamLine = new THREE.Mesh(seamGeo, seamMat);
     seamLine.rotation.x = -Math.PI / 2;
-    seamLine.position.set(0.65, 0.005, 0);
+    seamLine.position.set(0.65, 0.004, 0);
     scene.add(seamLine);
 
-    // Molten Glowing Cut Kerf Track
-    const kerfGeo = new THREE.PlaneGeometry(0.08, 4);
-    const kerfMat = new THREE.MeshBasicMaterial({
-      color: 0xff3b00,
+    // Station stationing tick marks along active seam (0.5m, 1.0m, etc.)
+    for (let z = -2.0; z <= 2.0; z += 0.8) {
+      const tick = new THREE.Mesh(new THREE.PlaneGeometry(0.2, 0.015), new THREE.MeshBasicMaterial({ color: 0x64748b }));
+      tick.rotation.x = -Math.PI / 2;
+      tick.position.set(0.65, 0.005, z);
+      scene.add(tick);
+    }
+
+    // 3. Active Severed Cut Groove (Permanently carved kerf extending behind the nozzle)
+    const cutStartPosZ = -2.0;
+    const cutMaxLenZ = 4.0;
+    const activeCutSlotGeo = new THREE.PlaneGeometry(0.08, cutMaxLenZ);
+    const activeCutSlotMat = new THREE.MeshBasicMaterial({ color: 0x040507 }); // jet black through-cut slit
+    const activeCutSlot = new THREE.Mesh(activeCutSlotGeo, activeCutSlotMat);
+    activeCutSlot.rotation.x = -Math.PI / 2;
+    activeCutSlot.position.set(0.65, 0.006, cutStartPosZ);
+    scene.add(activeCutSlot);
+
+    // Heat Affected Zone (HAZ) along active cut
+    const activeHazGeo = new THREE.PlaneGeometry(0.24, cutMaxLenZ);
+    const activeHazMat = new THREE.MeshBasicMaterial({ color: 0x1e1b4b, transparent: true, opacity: 0.8 }); // dark blue/amber heat tint
+    const activeHaz = new THREE.Mesh(activeHazGeo, activeHazMat);
+    activeHaz.rotation.x = -Math.PI / 2;
+    activeHaz.position.set(0.65, 0.005, cutStartPosZ);
+    scene.add(activeHaz);
+
+    // 4. Molten Glowing Kerf Tip (trailing 0.6m immediately behind the active cutting nozzle)
+    const moltenKerfGeo = new THREE.PlaneGeometry(0.12, 0.75);
+    const moltenKerfMat = new THREE.MeshBasicMaterial({
+      color: 0xff4500,
       transparent: true,
       opacity: 0.95,
     });
-    const kerfLine = new THREE.Mesh(kerfGeo, kerfMat);
-    kerfLine.rotation.x = -Math.PI / 2;
-    kerfLine.position.set(0.65, 0.008, 0);
-    scene.add(kerfLine);
+    const moltenKerf = new THREE.Mesh(moltenKerfGeo, moltenKerfMat);
+    moltenKerf.rotation.x = -Math.PI / 2;
+    moltenKerf.position.set(0.65, 0.009, cutStartPosZ);
+    scene.add(moltenKerf);
 
     // -------------------------------------------------------------
     // 4. KRAN-VULCAN ROBOT CONSTRUCTION (Matching User's Image 1)
@@ -549,7 +594,11 @@ export default function RobotArmSimulator3D({
       waveRing1,
       waveRing2,
       heightArrowMesh,
-      kerfLine,
+      activeCutSlot,
+      activeHaz,
+      moltenKerf,
+      cutStartPosZ,
+      cutMaxLenZ,
       sparkParticles,
       sparkPositions,
       sparkVelocities,
@@ -686,11 +735,24 @@ export default function RobotArmSimulator3D({
         // Plasma Arc & Sparks in CUTTING phase
         if (phase === 'CUTTING') {
           arcBeam.visible = true;
-          torchLight.intensity = 3.5 + Math.random() * 1.5;
-          torchLight.position.set(0.65, 0.1, currentZPos);
+          // Update dynamic physical cut mark on the ship plate
+          if (activeCutSlot && moltenKerf) {
+            const cutFraction = Math.max(0.02, Math.min(1, currentCutProgress / 100));
+            const currentLen = cutFraction * cutMaxLenZ;
+            const currentCenterZ = cutStartPosZ + currentLen / 2;
 
-          // Update kerf cut line width
-          kerfLine.scale.set(1, Math.min(1, currentCutProgress / 100 + 0.1), 1);
+            // Expand the permanent severed slot up to the current nozzle position!
+            activeCutSlot.scale.set(1, cutFraction, 1);
+            activeCutSlot.position.z = currentCenterZ;
+
+            activeHaz.scale.set(1, cutFraction, 1);
+            activeHaz.position.z = currentCenterZ;
+
+            // Position molten hot incandescent tip immediately behind active torch nozzle
+            moltenKerf.visible = true;
+            moltenKerf.position.z = currentZPos - 0.22;
+            moltenKerf.material.color.setHex(Math.sin(animClock * 20) > 0 ? 0xff4500 : 0xffa500);
+          }
 
           // Particle Sparks update
           const pos = sparkGeo.attributes.position.array;
@@ -905,28 +967,64 @@ export default function RobotArmSimulator3D({
           </div>
         </div>
 
-        {/* Opposite-Side Safety Clearance Signal (Top Right Overlay) */}
-        <div className="absolute top-4 right-4 p-3 rounded-xl bg-black/85 backdrop-blur-md border border-neutral-700 flex items-center gap-3 shadow-2xl pointer-events-none">
-          <div
-            className={`w-3.5 h-3.5 rounded-full ${
-              isSafeToCut ? 'bg-emerald-400 animate-ping' : 'bg-red-400 animate-bounce'
-            }`}
-          />
-          <div>
-            <span className="text-[10px] font-mono text-neutral-400 uppercase block">SAFETY SIGNAL</span>
-            <span
-              className={`text-xs font-mono font-bold ${
-                isSafeToCut ? 'text-emerald-400' : 'text-red-400'
+        {/* Opposite-Side Safety Clearance Signal & Cut Marks Telemetry (Top Right Overlay) */}
+        <div className="absolute top-4 right-4 flex flex-col gap-2 max-w-xs pointer-events-none">
+          <div className="p-3 rounded-xl bg-black/85 backdrop-blur-md border border-neutral-700 flex items-center gap-3 shadow-2xl">
+            <div
+              className={`w-3.5 h-3.5 rounded-full shrink-0 ${
+                isSafeToCut ? 'bg-emerald-400 animate-ping' : 'bg-red-400 animate-bounce'
               }`}
-            >
-              {isSafeToCut ? 'SIGNAL GREEN: SAFE TO CUT' : 'SIGNAL RED: GAS/TEMP INHIBIT'}
-            </span>
+            />
+            <div>
+              <span className="text-[10px] font-mono text-neutral-400 uppercase block">SAFETY SIGNAL</span>
+              <span
+                className={`text-xs font-mono font-bold ${
+                  isSafeToCut ? 'text-emerald-400' : 'text-red-400'
+                }`}
+              >
+                {isSafeToCut ? 'SIGNAL GREEN: SAFE TO CUT' : 'SIGNAL RED: GAS/TEMP INHIBIT'}
+              </span>
+            </div>
+          </div>
+
+          {/* Dedicated Cut Marking & Indian Metallurgy HUD Card */}
+          <div className="p-3.5 rounded-xl bg-black/85 backdrop-blur-md border border-neutral-700 text-xs font-mono space-y-1.5 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-neutral-800 pb-1">
+              <span className="text-[10px] uppercase text-amber-400 font-bold flex items-center gap-1">
+                <Flame className="w-3 h-3 text-amber-400" />
+                <span>CUT SEAM MARKING (LIVE)</span>
+              </span>
+              <span className="badge bg-amber-950 text-amber-300 border border-amber-800 text-[9px]">
+                HMS-1 (28mm)
+              </span>
+            </div>
+            <div className="flex justify-between text-[11px] text-neutral-300">
+              <span className="text-neutral-400">Material Grade:</span>
+              <span className="text-white font-bold">IS 2062 E250 (IRS AH36)</span>
+            </div>
+            <div className="flex justify-between text-[11px] text-neutral-300">
+              <span className="text-neutral-400">Distance Marked:</span>
+              <span className="text-cyan-400 font-bold">{(cutProgress * 0.045).toFixed(2)} m / 4.50 m</span>
+            </div>
+            <div className="flex justify-between text-[11px] text-neutral-300">
+              <span className="text-neutral-400">Kerf Cut Depth:</span>
+              <span className="text-emerald-400 font-bold">28 mm (Through-Cut)</span>
+            </div>
+            <div className="flex justify-between text-[11px] text-neutral-300 pt-1 border-t border-neutral-800">
+              <span className="text-neutral-400">Recovered Scrap:</span>
+              <span className="text-emerald-400 font-bold font-mono">
+                ₹{Math.round(cutProgress * 1650).toLocaleString('en-IN')}
+              </span>
+            </div>
+            <div className="text-[9px] text-neutral-500 text-right">
+              @ ₹38,500/MT (Alang Yard Index)
+            </div>
           </div>
         </div>
 
         {/* 3D Drag Tip Overlay */}
         <div className="absolute bottom-4 left-4 px-3 py-1.5 rounded-lg bg-black/75 backdrop-blur-sm border border-neutral-800 text-[10px] font-mono text-neutral-400 pointer-events-none hidden sm:block">
-          🖱️ Click & Drag to Rotate KRAN-VULCAN • Scroll to Zoom
+          🖱️ Click &amp; Drag to Rotate KRAN-VULCAN • Scroll to Zoom
         </div>
 
         {/* Cutting Seam Progress Indicator (Bottom Right) */}

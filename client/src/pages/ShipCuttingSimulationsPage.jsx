@@ -370,34 +370,44 @@ export default function ShipCuttingSimulationsPage() {
           />
 
           {/* Detailed Features of KRAN-VULCAN & Ultrasonic Height Sensing */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="p-4 rounded-xl bg-neutral-900/80 border border-dark-border space-y-2">
               <div className="flex items-center gap-2 text-cyan-400 font-bold text-xs font-mono">
                 <Bot className="w-4 h-4" />
-                <span>KRAN-VULCAN Magnetic Crawler Chassis</span>
+                <span>KRAN-VULCAN Chassis</span>
               </div>
               <p className="text-xs text-neutral-400 leading-relaxed">
-                Rugged aluminum chassis with dual continuous rubber tracks and embedded Neodymium pot magnets. Adheres firmly to vertical and curved rusted ship hull plates. Features transparent heat-shielded electronics bay housing Raspberry Pi 5 &amp; ESP32.
+                Rugged aluminum crawler with continuous rubber tracks &amp; Neodymium pot magnets. Crawls vertically on rusted IS 2062 ship hull plates.
               </p>
             </div>
 
             <div className="p-4 rounded-xl bg-neutral-900/80 border border-dark-border space-y-2">
               <div className="flex items-center gap-2 text-amber-400 font-bold text-xs font-mono">
                 <Radio className="w-4 h-4" />
-                <span>Ultrasonic Standoff &amp; Auto-Height (THC)</span>
+                <span>Ultrasonic Standoff (THC)</span>
               </div>
               <p className="text-xs text-neutral-400 leading-relaxed">
-                Ultrasonic transducer probe tracks nozzle-to-plate distance in real-time. Robot lowers and calibrates torch to the exact target standoff (e.g. 3.5 mm). Only after locking distance within tolerance does the plasma torch ignite and commence cutting!
+                Ultrasonic sensor measures nozzle-to-plate distance. Arm auto-lowers and locks at 3.5 mm standoff before torch ignition starts.
+              </p>
+            </div>
+
+            <div className="p-4 rounded-xl bg-neutral-900/80 border border-dark-border space-y-2">
+              <div className="flex items-center gap-2 text-orange-400 font-bold text-xs font-mono">
+                <Flame className="w-4 h-4" />
+                <span>Permanent Cut Marks</span>
+              </div>
+              <p className="text-xs text-neutral-400 leading-relaxed">
+                As the robot advances, severed kerf grooves (28mm through-cut) permanently mark into the steel plate with glowing heat and HAZ discoloration.
               </p>
             </div>
 
             <div className="p-4 rounded-xl bg-neutral-900/80 border border-dark-border space-y-2">
               <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs font-mono">
                 <ShieldCheck className="w-4 h-4" />
-                <span>Front Gas Pods &amp; Safety Interlock</span>
+                <span>Gas Pods &amp; Interlock</span>
               </div>
               <p className="text-xs text-neutral-400 leading-relaxed">
-                Front bumper cluster with 3 gas sensors and OAK-D Lite stereo camera inspects ambient fumes. Linked with opposite bulkhead telemetry—if explosive fumes or temperature &gt; 50°C occur, cut is electronically inhibited immediately.
+                Triple front gas canisters &amp; OAK-D Lite camera. Interlocked with opposite void—hazardous gas or heat halts cutting instantly.
               </p>
             </div>
           </div>

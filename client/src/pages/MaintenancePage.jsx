@@ -138,7 +138,7 @@ export default function MaintenancePage() {
                     <User className="w-3.5 h-3.5 text-neutral-500" />
                     <span>{log.technician}</span>
                   </td>
-                  <td className="py-3 px-4 font-mono text-white">${log.cost?.toLocaleString()}</td>
+                  <td className="py-3 px-4 font-mono text-white">₹{log.cost?.toLocaleString('en-IN')}</td>
                   <td className="py-3 px-4">
                     <span
                       className={`badge font-mono text-[10px] uppercase ${

@@ -25,23 +25,23 @@ export default function MaterialPage() {
   if (loading) return <LoadingSpinner text="Analyzing spectrometry data..." />;
 
   const mat = materials || {
-    sampleBatchId: 'BATCH-2026-MAT-77',
+    sampleBatchId: 'BATCH-2026-ALANG-MAT-77',
     composition: { steel: 78.5, iron: 12.2, aluminum: 4.8, copper: 2.7, other: 1.8 },
     totalWeight: 19350,
-    grade: 'Marine Grade AH36 / Mild Steel Mix',
-    corrosionLevel: 'Moderate',
+    grade: 'IS 2062 Grade E250 / IRS AH36 Marine High-Tensile Steel',
+    corrosionLevel: 'Moderate (SA 2.5 Shot-Blast Ready)',
     recyclabilityScore: 94.6,
-    conditionNotes: 'Optimal for electric arc furnace smelting. Minimal composite contaminants.',
+    conditionNotes: 'Optimal for Indian Electric Arc Furnaces (EAF) & Bhavnagar / Mandi Gobindgarh Re-Rolling Mills. Sulfur < 0.035%, Phosphorus < 0.035%.',
   };
 
   const comp = mat.composition || {};
 
   const compositionItems = [
-    { label: 'Marine Structural Steel', percent: comp.steel || 78.5, color: '#38bdf8', tons: '15,190 T' },
-    { label: 'Cast & Scrap Iron', percent: comp.iron || 12.2, color: '#94a3b8', tons: '2,360 T' },
-    { label: 'Superstructure Aluminum', percent: comp.aluminum || 4.8, color: '#e0e0e0', tons: '928 T' },
-    { label: 'Copper / Bronze Alloy', percent: comp.copper || 2.7, color: '#f59e0b', tons: '522 T' },
-    { label: 'Insulation & Trace Residue', percent: comp.other || 1.8, color: '#f43f5e', tons: '348 T' },
+    { label: 'IS 2062 E250/E350 Hull Plates (HMS-1 Scrap)', percent: comp.steel || 78.5, color: '#38bdf8', tons: '15,190 MT' },
+    { label: 'Cast Iron Engine Blocks & Machinery (CI Scrap)', percent: comp.iron || 12.2, color: '#94a3b8', tons: '2,360 MT' },
+    { label: 'Superstructure Marine Aluminum (Alloy 5083)', percent: comp.aluminum || 4.8, color: '#e0e0e0', tons: '928 MT' },
+    { label: 'Naval Brass (IS 291) & Cu-Ni 90/10 Alloys', percent: comp.copper || 2.7, color: '#f59e0b', tons: '522 MT' },
+    { label: 'Oxidized Kerf Slag & Mineral Residue', percent: comp.other || 1.8, color: '#f43f5e', tons: '348 MT' },
   ];
 
   return (
@@ -50,10 +50,10 @@ export default function MaterialPage() {
       <div>
         <div className="flex items-center gap-2">
           <FlaskConical className="w-5 h-5 text-accent-cyan" />
-          <h2 className="text-xl font-bold text-white">Vessel Material Spectrometry & Alloy Analysis</h2>
+          <h2 className="text-xl font-bold text-white">Vessel Material Spectrometry &amp; Indian Marine Metallurgy</h2>
         </div>
         <p className="text-xs text-text-secondary mt-1">
-          Optical emission spectrometry (OES) analysis of dismantled metal sections for maximum scrap resale yield.
+          Optical emission spectrometry (OES) calibrated to Indian Register of Shipping (IRS) and Bureau of Indian Standards (IS 2062).
         </p>
       </div>
 
@@ -61,14 +61,14 @@ export default function MaterialPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatsCard
           title="Total Recoverable Metal"
-          value={mat.totalWeight?.toLocaleString()}
-          unit="metric tons"
+          value={mat.totalWeight?.toLocaleString('en-IN')}
+          unit="metric tons (MT)"
           icon={Layers}
         />
         <StatsCard
           title="Recyclability Score"
           value={`${mat.recyclabilityScore}%`}
-          change="Tier 1 Circular"
+          change="Alang Tier 1 Green"
           changeType="positive"
           icon={Award}
         />
@@ -79,9 +79,9 @@ export default function MaterialPage() {
           icon={ShieldAlert}
         />
         <StatsCard
-          title="Primary Alloy Grade"
-          value="AH36 Steel"
-          subtitle="Yield strength: 355 MPa"
+          title="Primary Hull Grade"
+          value="IS 2062 E250"
+          subtitle="IRS AH36 • Yield: 355 MPa"
           icon={CheckCircle2}
         />
       </div>
