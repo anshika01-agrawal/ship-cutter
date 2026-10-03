@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import PublicLayout from './components/layout/PublicLayout';
 import DashboardLayout from './components/layout/DashboardLayout';
 import ScrollToHash from './components/common/ScrollToHash';
+import ErrorBoundary from './components/common/ErrorBoundary';
 
 // Public Pages
 import HomePage from './pages/HomePage';
@@ -27,9 +28,10 @@ import DatabaseViewerPage from './pages/DatabaseViewerPage';
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <ScrollToHash />
-      <Routes>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <ScrollToHash />
+        <Routes>
         {/* Public Website Routes */}
         <Route element={<PublicLayout />}>
           <Route path="/" element={<HomePage />} />
@@ -57,5 +59,6 @@ export default function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
-  );
+  </ErrorBoundary>
+);
 }

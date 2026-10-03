@@ -14,7 +14,8 @@ import {
   Activity,
   Radio,
   Zap,
-  Database
+  Database,
+  ShieldAlert
 } from 'lucide-react';
 
 export default function Sidebar({ isOpen, onClose }) {
