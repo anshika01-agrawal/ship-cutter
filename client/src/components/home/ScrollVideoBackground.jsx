@@ -113,8 +113,8 @@ export default function ScrollVideoBackground() {
         }}
         onError={(e) => {
           // Fallback to original file name if renamed
-          if (!e.currentTarget.src.includes('istockphoto')) {
-            e.currentTarget.src = '/videos/istockphoto-908044948-640_adpp_is.mp4';
+          if (!e.currentTarget.src.includes('istockphoto-2197565610')) {
+            e.currentTarget.src = '/videos/istockphoto-2197565610-640_adpp_is.mp4';
           }
         }}
       />
