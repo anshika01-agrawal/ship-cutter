@@ -21,22 +21,15 @@ export default function HeroSection() {
   const [showVideoModal, setShowVideoModal] = useState(false);
 
   return (
-    <section className="relative min-h-[92vh] flex items-center justify-center overflow-hidden border-b border-dark-border bg-black">
-      {/* Background Graphic & Dark Gradient Overlay */}
-      <div className="absolute inset-0 z-0">
-        <img
-          src="https://images.unsplash.com/photo-1504917599217-d4dc5ebe6122?auto=format&fit=crop&w=2400&q=85"
-          alt="High-intensity autonomous plasma ship cut"
-          className={`w-full h-full object-cover transition-all duration-1000 filter grayscale contrast-125 brightness-[0.38] ${
-            isPlaying ? 'scale-105 animate-pulse duration-[8000ms]' : 'scale-100'
-          }`}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent" />
-        <div className="absolute inset-0 bg-radial-gradient from-transparent via-black/60 to-black pointer-events-none" />
+    <section className="relative min-h-[92vh] flex items-center justify-center overflow-hidden border-b border-dark-border/60 bg-transparent">
+      {/* Ambient Gradient Overlays for High-Contrast Hero Text */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
+        <div className="absolute inset-0 bg-radial-gradient from-transparent via-black/40 to-black/80" />
 
         {/* Ambient Grid overlay */}
         <div
-          className="absolute inset-0 opacity-15 pointer-events-none"
+          className="absolute inset-0 opacity-15"
           style={{
             backgroundImage: 'radial-gradient(circle, #555555 1px, transparent 1px)',
             backgroundSize: '32px 32px',
