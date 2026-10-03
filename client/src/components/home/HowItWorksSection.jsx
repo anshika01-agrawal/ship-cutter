@@ -15,21 +15,36 @@ import AnimatedSection from '../common/AnimatedSection';
 
 export default function HowItWorksSection() {
   const [activeStep, setActiveStep] = useState(0);
+  const [activeSubImg, setActiveSubImg] = useState(0);
 
   const steps = [
     {
       num: '01',
-      title: '3D LiDAR & Ultrasound Scan',
-      badge: 'Perception Phase',
+      title: 'Human Hazard vs Auto-Scan',
+      badge: 'Human Elimination Phase',
       icon: Scan,
-      headline: 'Non-Destructive Hull & Internal Void Mapping',
-      desc: 'Before any thermal ignition occurs, autonomous crawler drones sweep the vessel structure with multi-beam LiDAR and high-frequency ultrasonic transducers. This detects exact plate thickness, hidden piping runs, fuel oil residue pockets, and structural stress concentration points.',
-      image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=1200&q=80',
+      headline: 'Replacing Dangerous Manual Human Intervention With Autonomous Scanners',
+      desc: 'Conventional ship scrapping relies on manual human laborers climbing precarious ladders and scaffolding with oxy-fuel torches amidst flying molten slag, toxic fumes, and risk of catastrophic collapse. Our autonomous magnetic crawlers eliminate human entry into danger zones completely, using ultrasonic standoff sensors and multi-beam LiDAR for 100% remote hull mapping.',
+      image: '/images/manual_hull_cutting_ladder.jpg',
+      images: [
+        {
+          url: '/images/manual_hull_cutting_ladder.jpg',
+          title: 'Manual Cutting on Ladder',
+          badge: 'High Spark & Fall Danger',
+          caption: 'Worker perched on ladder cutting hull plate under flying spark showers',
+        },
+        {
+          url: '/images/manual_hull_cutting_torch.jpg',
+          title: 'Under-Hull Scaffolding Torch',
+          badge: 'Crush & Toxic Fume Zone',
+          caption: 'Laborer standing under towering hull steel during manual flame torching',
+        },
+      ],
       specs: [
-        { label: 'Scanning Resolution', value: '0.5 mm spatial mesh' },
-        { label: 'Thickness Range', value: '6 mm - 120 mm steel' },
+        { label: 'Human Fall Risk', value: '0% (Eliminated completely)' },
+        { label: 'Ultrasonic Standoff', value: '40 mm fixed gap calibration' },
         { label: 'Hazard Detection', value: 'Combustible vapor sensor array' },
-        { label: 'Time Required', value: '45 mins per 50m section' },
+        { label: 'Worker Protection', value: '100% remote perimeter control' },
       ],
     },
     {
@@ -190,25 +205,62 @@ export default function HowItWorksSection() {
             </div>
 
             {/* Right 5 cols: High-Res Step Image with HUD overlay */}
-            <div className="lg:col-span-5">
+            <div className="lg:col-span-5 space-y-3">
               <div className="relative aspect-square sm:aspect-video lg:aspect-[4/3] rounded-xl overflow-hidden border border-neutral-700 bg-black group shadow-glow-sm">
                 <img
-                  src={current.image}
+                  src={current.images ? current.images[activeSubImg]?.url : current.image}
                   alt={current.title}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 filter grayscale contrast-110"
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 filter contrast-110"
+                  onError={(e) => {
+                    e.currentTarget.src = 'https://images.unsplash.com/photo-1504917599217-d4dc5ebe6122?auto=format&fit=crop&w=1200&q=80';
+                  }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-85" />
 
                 {/* Technical HUD Overlay on Image */}
-                <div className="absolute top-3 left-3 px-2 py-1 rounded bg-black/80 backdrop-blur-md border border-neutral-700 text-[10px] font-mono text-cyan-300">
-                  FEED: ACTIVE • SENSORS OK
+                <div className="absolute top-3 left-3 px-2.5 py-1 rounded bg-black/85 backdrop-blur-md border border-neutral-700 text-[10px] font-mono text-cyan-300 flex items-center gap-1.5">
+                  <span className={`w-2 h-2 rounded-full ${current.images ? 'bg-red-500 animate-pulse' : 'bg-emerald-400'}`} />
+                  {current.images ? 'MANUAL HAZARD ARCHIVE' : 'FEED: ACTIVE • SENSORS OK'}
                 </div>
 
                 <div className="absolute bottom-4 left-4 right-4">
-                  <div className="text-[11px] font-mono text-neutral-400">STAGE VERIFICATION</div>
-                  <div className="text-sm font-bold text-white mt-0.5">{current.title}</div>
+                  <div className="text-[11px] font-mono text-amber-400 uppercase tracking-wide">
+                    {current.images ? current.images[activeSubImg]?.badge : 'STAGE VERIFICATION'}
+                  </div>
+                  <div className="text-sm font-bold text-white mt-0.5">
+                    {current.images ? current.images[activeSubImg]?.caption : current.title}
+                  </div>
                 </div>
               </div>
+
+              {/* Multiple Hazard Images Switcher (For Step 01) */}
+              {current.images && (
+                <div className="grid grid-cols-2 gap-2">
+                  {current.images.map((imgObj, i) => (
+                    <button
+                      key={imgObj.url}
+                      onClick={() => setActiveSubImg(i)}
+                      className={`p-2 rounded-lg border text-left transition-all flex items-center gap-2.5 ${
+                        activeSubImg === i
+                          ? 'border-red-500 bg-red-950/40 shadow-glow-sm ring-1 ring-red-500/50'
+                          : 'border-neutral-800 bg-neutral-900/70 hover:border-neutral-700 opacity-70 hover:opacity-100'
+                      }`}
+                    >
+                      <img
+                        src={imgObj.url}
+                        alt="thumb"
+                        className="w-10 h-10 object-cover rounded border border-neutral-700 shrink-0"
+                      />
+                      <div className="min-w-0">
+                        <span className="text-[10px] font-mono font-bold text-red-400 block">Hazard #{i + 1}</span>
+                        <span className="text-xs font-semibold text-white truncate block">
+                          {imgObj.title}
+                        </span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </motion.div>
         </AnimatePresence>

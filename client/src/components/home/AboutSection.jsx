@@ -37,7 +37,9 @@ export default function AboutSection() {
   const pillars = [
     {
       title: 'Human-Free Hazard Zones',
-      desc: 'Confined spaces, oil residue fumes, and shifting structural bulkheads are tackled 100% by autonomous magnetic crawlers.',
+      desc: 'Confined spaces, oil residue fumes, and shifting structural bulkheads are tackled 100% by autonomous magnetic crawlers—eliminating dangerous human exposure.',
+      image: '/images/manual_hull_cutting_torch.jpg',
+      imageCaption: 'Legacy Hazard: Manual flame cutting under towering hulls with extreme fall & crush risks',
       icon: ShieldCheck,
     },
     {
@@ -108,9 +110,26 @@ export default function AboutSection() {
                   <div className="w-11 h-11 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center justify-center text-cyan-300 shrink-0">
                     <Icon className="w-5 h-5" />
                   </div>
-                  <div>
+                  <div className="flex-1 min-w-0">
                     <h4 className="text-base font-semibold text-white">{pil.title}</h4>
                     <p className="text-xs text-text-secondary mt-1.5 leading-relaxed">{pil.desc}</p>
+                    {pil.image && (
+                      <div className="mt-3.5 flex items-center gap-3 p-2.5 rounded-xl bg-black/80 border border-neutral-800">
+                        <img
+                          src={pil.image}
+                          alt="Manual hazard"
+                          className="w-14 h-14 object-cover rounded-lg border border-neutral-700 shrink-0"
+                        />
+                        <div className="min-w-0">
+                          <span className="text-[10px] font-mono text-red-400 font-bold block uppercase tracking-wider">
+                            ⚠️ Manual Human Hazard
+                          </span>
+                          <span className="text-xs text-neutral-300 block font-medium line-clamp-2 mt-0.5">
+                            {pil.imageCaption}
+                          </span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </AnimatedSection>
