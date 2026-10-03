@@ -13,7 +13,7 @@ export default function GallerySection() {
       title: 'Transverse Bulkhead Plasma Cut',
       category: 'plasma',
       categoryLabel: 'Plasma Cutting',
-      img: 'https://images.unsplash.com/photo-1504917599217-d4dc5ebe6122?auto=format&fit=crop&w=1200&q=80',
+      img: '/images/plasma_cut_hull.jpg',
       specs: '32mm AH36 Plate • 142 cm/min • Clean Kerf',
       location: 'Alang Dry Dock 4B',
     },
@@ -28,12 +28,12 @@ export default function GallerySection() {
     },
     {
       id: 3,
-      title: 'Titan Crawler Magnetic Vertical Grip',
+      title: 'KRAN-VULCAN Magnetic Vertical Grip',
       category: 'robot',
       categoryLabel: 'Crawler Robotics',
-      img: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=1200&q=80',
-      specs: '850kg Traction • 6-Axis Torch Articulation',
-      location: 'Rotterdam Offshore Basin',
+      img: '/images/kran_vulcan_crawler.jpg',
+      specs: '850kg Traction • Neodymium Continuous Tracks',
+      location: 'Alang Shipyard Berth 12',
     },
     {
       id: 4,
@@ -55,11 +55,11 @@ export default function GallerySection() {
     },
     {
       id: 6,
-      title: 'Real-Time Thermal Infrared Seam Monitoring',
+      title: 'Articulated Arm with Thermal Cutting Torch',
       category: 'plasma',
       categoryLabel: 'Plasma Cutting',
-      img: 'https://images.unsplash.com/photo-1505705694340-019e1e335916?auto=format&fit=crop&w=1200&q=80',
-      specs: 'Continuous FLIR Sensor • Frame Warpage < 1.5mm',
+      img: '/images/robot_arm_torch.jpg',
+      specs: 'Continuous Ultrasonic Standoff • Frame Warpage < 1.5mm',
       location: 'Mobile Deployment Unit Alpha',
     },
     {
@@ -147,6 +147,10 @@ export default function GallerySection() {
                 <img
                   src={item.img}
                   alt={item.title}
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = '/images/plasma_cut_hull.jpg';
+                  }}
                   className="w-full h-full object-cover filter grayscale contrast-110 group-hover:grayscale-0 group-hover:scale-105 transition-all duration-500"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-80 group-hover:opacity-60 transition-opacity" />

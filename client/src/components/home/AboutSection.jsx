@@ -130,24 +130,32 @@ export default function AboutSection() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
             {team.map((member, idx) => (
-              <AnimatedSection key={member.name} delay={idx * 0.1}>
-                <div className="card-surface border border-dark-border bg-dark-card rounded-xl overflow-hidden hover:border-neutral-500 transition-all flex flex-col justify-between group">
-                  <div>
-                    <div className="aspect-[4/3] w-full overflow-hidden bg-neutral-950">
-                      <img
-                        src={member.photo}
-                        alt={member.name}
-                        className="w-full h-full object-cover filter grayscale contrast-110 group-hover:grayscale-0 group-hover:scale-105 transition-all duration-500"
-                      />
-                    </div>
-                    <div className="p-5">
+              <AnimatedSection key={member.name} delay={idx * 0.1} className="h-full flex flex-col">
+                <div className="card-surface h-full border border-dark-border bg-dark-card rounded-2xl overflow-hidden hover:border-cyan-500/50 transition-all flex flex-col justify-between group shadow-xl">
+                  {/* Fixed Uniform Photo Frame */}
+                  <div className="aspect-[4/5] w-full overflow-hidden bg-neutral-950 relative shrink-0">
+                    <img
+                      src={member.photo}
+                      alt={member.name}
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = '/images/anurag_tiwari.jpg';
+                      }}
+                      className="w-full h-full object-cover object-top filter grayscale contrast-110 group-hover:grayscale-0 group-hover:scale-105 transition-all duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-dark-card/80 via-transparent to-transparent opacity-60" />
+                  </div>
+
+                  {/* Card Content with Uniform Height */}
+                  <div className="p-5 flex-1 flex flex-col justify-between">
+                    <div>
                       <h4 className="text-base font-bold text-white group-hover:text-cyan-300 transition-colors">
                         {member.name}
                       </h4>
-                      <div className="text-xs font-mono text-cyan-400 mt-0.5">{member.role}</div>
-                      <div className="text-[10px] text-neutral-500 font-mono mt-1">{member.credentials}</div>
+                      <div className="text-xs font-mono text-cyan-400 mt-1 font-semibold">{member.role}</div>
+                      <div className="text-[10px] text-neutral-400 font-mono mt-1">{member.credentials}</div>
                       <p className="text-xs text-text-secondary mt-3 leading-relaxed">
                         {member.bio}
                       </p>
